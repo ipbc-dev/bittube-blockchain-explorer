@@ -1546,7 +1546,7 @@ public:
 
         if (xmr_address_str.empty())
         {
-            return string("Monero address not provided!");
+            return string("BitTube address not provided!");
         }
 
         if (viewkey_str.empty())
@@ -4778,7 +4778,7 @@ public:
         if (address_str.empty())
         {
             j_response["status"]  = "error";
-            j_response["message"] = "Monero address not provided";
+            j_response["message"] = "BitTube address not provided";
             return j_response;
         }
 
@@ -5003,7 +5003,7 @@ public:
         if (address_str.empty())
         {
             j_response["status"]  = "error";
-            j_response["message"] = "Monero address not provided";
+            j_response["message"] = "BitTube address not provided";
             return j_response;
         }
 

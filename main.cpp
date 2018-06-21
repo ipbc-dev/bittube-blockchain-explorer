@@ -190,7 +190,7 @@ main(int ac, const char* av[])
     {
         // This starts new thread, which aim is
         // to calculate, store and monitor
-        // current total Monero emission amount.
+        // current total BitTube emission amount.
 
         // This thread stores the current emission
         // which it has caluclated in

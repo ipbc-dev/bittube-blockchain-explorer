@@ -156,14 +156,14 @@ public:
 
             if (!err.empty())
             {
-                cerr << "Error connecting to Monero deamon due to "
+                cerr << "Error connecting to BitTube deamon due to "
                      << err << endl;
                 return false;
             }
         }
         else
         {
-            cerr << "Error connecting to Monero deamon at "
+            cerr << "Error connecting to BitTube deamon at "
                  << deamon_url << endl;
             return false;
         }

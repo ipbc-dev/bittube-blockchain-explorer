@@ -18,7 +18,7 @@ namespace xmreg
         p.add("txhash", -1);
 
         options_description desc(
-                "xmrblocks, Onion Monero Blockchain Explorer");
+                "xmrblocks, Onion BitTube Blockchain Explorer");
 
         desc.add_options()
                 ("help,h", value<bool>()->default_value(false)->implicit_value(true),
@@ -48,7 +48,7 @@ namespace xmreg
                 ("enable-autorefresh-option", value<bool>()->default_value(false)->implicit_value(true),
                  "enable users to have the index page on autorefresh")
                 ("enable-emission-monitor", value<bool>()->default_value(false)->implicit_value(true),
-                 "enable Monero total emission monitoring thread")
+                 "enable BitTube total emission monitoring thread")
                 ("port,p", value<string>()->default_value("8081"),
                  "default explorer port")
                 ("testnet-url", value<string>()->default_value(""),
@@ -70,7 +70,7 @@ namespace xmreg
                 ("ssl-key-file", value<string>(),
                  "path to key file for ssl (https) functionality")
                 ("deamon-url,d", value<string>()->default_value("http:://127.0.0.1:24182"),
-                 "Monero deamon url");
+                 "BitTube deamon url");
 
 
         store(command_line_parser(acc, avv)

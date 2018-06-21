@@ -274,7 +274,7 @@ get_tx_pub_key_from_received_outs(const transaction &tx);
 static
 string
 xmr_amount_to_str(const uint64_t& xmr_amount,
-                  string _format="{:0.12f}",
+                  string _format="{:0.8f}",
                   bool zero_to_question_mark=true)
 {
     string amount_str = "?";

@@ -6,7 +6,7 @@
 #ifndef CROWXMR_RPCCALLS_H
 #define CROWXMR_RPCCALLS_H
 
-#include "monero_headers.h"
+#include "bittube_headers.h"
 
 #include <mutex>
 #include <utility>
@@ -47,8 +47,8 @@ struct has_destructor
 
 namespace cryptonote
 {
-// declare struct in monero's cryptonote namespace.
-// monero should provide definition for this,
+// declare struct in BitTube's cryptonote namespace.
+// BitTube should provide definition for this,
 // but we need to have it declared as we are going to
 // check if its definition exist or not. depending on this
 // we decide what gets to be defined as
@@ -85,7 +85,7 @@ public:
              uint64_t _timeout = 200000);
 
     bool
-    connect_to_monero_daemon();
+    connect_to_bittube_daemon();
 
     uint64_t
     get_current_height();
@@ -130,7 +130,7 @@ public:
         {
             std::lock_guard<std::mutex> guard(m_daemon_rpc_mutex);
 
-            if (!connect_to_monero_daemon())
+            if (!connect_to_bittube_daemon())
             {
                 cerr << "get_alt_blocks: not connected to daemon" << endl;
                 return false;

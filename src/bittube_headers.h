@@ -2,8 +2,8 @@
 // Created by mwo on 5/11/15.
 //
 
-#ifndef XMREG01_MONERO_HEADERS_H_H
-#define XMREG01_MONERO_HEADERS_H_H
+#ifndef XMREG01_BITTUBE_HEADERS_H_H
+#define XMREG01_BITTUBE_HEADERS_H_H
 
 #define DB_LMDB   2
 #define BLOCKCHAIN_DB DB_LMDB
@@ -41,5 +41,5 @@
 #include "string_coding.h"
 
 
-#endif //XMREG01_MONERO_HEADERS_H_H
+#endif //XMREG01_BITTUBE_HEADERS_H_H
 

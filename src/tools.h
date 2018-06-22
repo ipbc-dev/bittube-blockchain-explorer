@@ -224,7 +224,7 @@ get_payment_id(const transaction& tx,
 inline double
 get_xmr(uint64_t core_amount)
 {
-    return  static_cast<double>(core_amount) / 1e12;
+    return  static_cast<double>(core_amount) / 1e8;
 }
 
 array<size_t, 5>

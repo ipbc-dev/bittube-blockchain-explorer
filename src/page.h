@@ -344,7 +344,7 @@ public:
 
     page(MicroCore* _mcore,
          Blockchain* _core_storage,
-         string _deamon_url,
+         string _daemon_url,
          cryptonote::network_type _nettype,
          bool _enable_pusher,
          bool _enable_js,
@@ -362,7 +362,7 @@ public:
          string _mainnet_url)
             : mcore {_mcore},
               core_storage {_core_storage},
-              rpc {_deamon_url},
+              rpc {_daemon_url},
               server_timestamp {std::time(nullptr)},
               nettype {_nettype},
               enable_pusher {_enable_pusher},
@@ -487,9 +487,9 @@ public:
     {
 
         // we get network info, such as current hash rate
-        // but since this makes a rpc call to deamon, we make it as an async
+        // but since this makes a rpc call to daemon, we make it as an async
         // call. this way we dont have to wait with execution of the rest of the
-        // index2 method, until deamon gives as the required result.
+        // index2 method, until daemon gives as the required result.
         std::future<json> network_info_ftr = std::async(std::launch::async, [&]
         {
             json j_info;

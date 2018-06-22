@@ -45,7 +45,7 @@ main(int ac, const char* av[])
 
     auto port_opt                      = opts.get_option<string>("port");
     auto bc_path_opt                   = opts.get_option<string>("bc-path");
-    auto deamon_url_opt                = opts.get_option<string>("deamon-url");
+    auto daemon_url_opt                = opts.get_option<string>("daemon-url");
     auto ssl_crt_file_opt              = opts.get_option<string>("ssl-crt-file");
     auto ssl_key_file_opt              = opts.get_option<string>("ssl-key-file");
     auto no_blocks_on_index_opt        = opts.get_option<string>("no-blocks-on-index");
@@ -164,12 +164,12 @@ main(int ac, const char* av[])
         return EXIT_FAILURE;
     }
 
-    string deamon_url {*deamon_url_opt};
+    string daemon_url {*daemon_url_opt};
 
-    if (testnet && deamon_url == "http:://127.0.0.1:24182")
-        deamon_url = "http:://127.0.0.1:34182";
-    if (stagenet && deamon_url == "http:://127.0.0.1:24182")
-        deamon_url = "http:://127.0.0.1:44182";
+    if (testnet && daemon_url == "http:://127.0.0.1:24182")
+        daemon_url = "http:://127.0.0.1:34182";
+    if (stagenet && daemon_url == "http:://127.0.0.1:24182")
+        daemon_url = "http:://127.0.0.1:44182";
 
     uint64_t mempool_info_timeout {5000};
 
@@ -205,8 +205,8 @@ main(int ac, const char* av[])
                 = blockchain_path;
         xmreg::CurrentBlockchainStatus::nettype
                 = nettype;
-        xmreg::CurrentBlockchainStatus::deamon_url
-                = deamon_url;
+        xmreg::CurrentBlockchainStatus::daemon_url
+                = daemon_url;
         xmreg::CurrentBlockchainStatus::set_blockchain_variables(
                 &mcore, core_storage);
 
@@ -222,8 +222,8 @@ main(int ac, const char* av[])
             = blockchain_path;
     xmreg::MempoolStatus::nettype
             = nettype;
-    xmreg::MempoolStatus::deamon_url
-            = deamon_url;
+    xmreg::MempoolStatus::daemon_url
+            = daemon_url;
     xmreg::MempoolStatus::set_blockchain_variables(
             &mcore, core_storage);
 
@@ -255,7 +255,7 @@ main(int ac, const char* av[])
     // contains logic for the website
     xmreg::page xmrblocks(&mcore,
                           core_storage,
-                          deamon_url,
+                          daemon_url,
                           nettype,
                           enable_pusher,
                           enable_js,

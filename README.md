@@ -223,8 +223,8 @@ xmrblocks, Onion BitTube Blockchain Explorer:
                                         functionality
   --ssl-key-file arg                    path to key file for ssl (https)
                                         functionality
-  -d [ --deamon-url ] arg (=http:://127.0.0.1:24182)
-                                        BitTube deamon url
+  -d [ --daemon-url ] arg (=http:://127.0.0.1:24182)
+                                        BitTube daemon url
 ```
 
 Example usage, defined as bash aliases.

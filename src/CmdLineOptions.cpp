@@ -69,8 +69,8 @@ namespace xmreg
                  "path to crt file for ssl (https) functionality")
                 ("ssl-key-file", value<string>(),
                  "path to key file for ssl (https) functionality")
-                ("deamon-url,d", value<string>()->default_value("http:://127.0.0.1:24182"),
-                 "BitTube deamon url");
+                ("daemon-url,d", value<string>()->default_value("http:://127.0.0.1:24182"),
+                 "BitTube daemon url");
 
 
         store(command_line_parser(acc, avv)

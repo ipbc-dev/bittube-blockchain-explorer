@@ -9,7 +9,7 @@ project(${PROJECT_NAME})
 set(CMAKE_CXX_STANDARD 14)
 
 if (WIN32)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wa,-mbig-obj -O3")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wa,-mbig-obj -O3 -fstack-protector")
 endif()
 
 
@@ -126,6 +126,8 @@ set(LIBRARIES
 
 if(APPLE)
     set(LIBRARIES ${LIBRARIES} "-framework IOKit -framework PCSC")
+elseif(WIN32)
+    set(LIBRARIES ${LIBRARIES} atomic winscard)
 else()
     set(LIBRARIES ${LIBRARIES} atomic pcsclite)
 endif()

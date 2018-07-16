@@ -35,6 +35,7 @@
 
 #define TMPL_DIR                    "./templates"
 #define TMPL_PARIALS_DIR            TMPL_DIR "/partials"
+#define TMPL_ROBOTO_FONT            TMPL_DIR "/css/roboto_font.css"
 #define TMPL_CSS_STYLES             TMPL_DIR "/css/style.css"
 #define TMPL_INDEX                  TMPL_DIR "/index.html"
 #define TMPL_INDEX2                 TMPL_DIR "/index2.html"
@@ -459,6 +460,7 @@ public:
         // read template files for all the pages
         // into template_file map
 
+        template_file["roboto_font"]     = xmreg::read(TMPL_ROBOTO_FONT);
         template_file["css_styles"]      = xmreg::read(TMPL_CSS_STYLES);
         template_file["header"]          = xmreg::read(TMPL_HEADER);
         template_file["footer"]          = get_footer();
@@ -6496,7 +6498,7 @@ private:
         context["enable_js"] = enable_js;
 
         context["css_styles"] = mstch::lambda{[&](const std::string& text) -> mstch::node {
-            return template_file["css_styles"];
+            return template_file["roboto_font"] + template_file["css_styles"];
         }};
     }
 

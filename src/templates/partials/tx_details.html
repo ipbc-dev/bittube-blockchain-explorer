@@ -94,20 +94,22 @@
                         {{/enable_js}}
                     </h5>
                     <form action="/myoutputs" method="post" style="width:100%; margin-top:2px" class="style-1">
-                        <input type="hidden" name="tx_hash" value="{{tx_hash}}"><br/>
-                        <input type="text" name="xmr_address" size="110" placeholder="BitTube address/subaddress"><br/>
-                        <input type="text" name="viewkey" size="110" placeholder="Private viewkey" style="margin-top:5px"><br/>
-                        <input type="hidden" name="raw_tx_data" value="{{raw_tx_data}}">
+                        <div class="form-group">
+                        <input type="hidden" name="tx_hash" value="{{tx_hash}}" class="form-control"><br/>
+                        <input type="text" name="xmr_address" size="110" placeholder="BitTube address/subaddress" class="form-control"><br/>
+                        <input type="text" name="viewkey" size="110" placeholder="Private viewkey" class="form-control"><br/>
+                        <input type="hidden" name="raw_tx_data" value="{{raw_tx_data}}" class="form-control">
                         <!--above raw_tx_data field only used when checking raw tx data through tx pusher-->
 
                         {{#enable_js}}
                         <!-- if have js, DONOT submit the form to server.
                              change submit button, to just a button -->
-                            <button type="button" style="margin-top:5px" id="decode_btn" >Decode outputs</button>
+                            <button type="button" class="roseButton" id="decode_btn" >Decode outputs</button>
                         {{/enable_js}}
                         {{^enable_js}}
-                            <input type="submit" value="Decode outputs" style="margin-top:5px" >
+                            <input type="submit" value="Decode outputs" class="roseButton" >
                         {{/enable_js}}
+                        </div>
                     </form>
                 </div>
             </div>
@@ -130,21 +132,22 @@
                         {{/enable_js}}
                     </h5>
                     <form action="/prove" method="post" style="width:100%;margin-top:2px" class="style-1">
-                       <input type="hidden" name="txhash" value="{{tx_hash}}"><br/>
-                       <input type="text" name="txprvkey" size="120" placeholder="Tx private key"><br/>
-                        <input type="hidden" name="raw_tx_data" value="{{raw_tx_data}}">
+                        <div class="form-group">
+                        <input type="hidden" name="txhash" value="{{tx_hash}}" class="form-control"><br/>
+                        <input type="text" name="txprvkey" size="120" placeholder="Tx private key" class="form-control"><br/>
+                        <input type="hidden" name="raw_tx_data" value="{{raw_tx_data}}" class="form-control">
                         <!--above raw_tx_data field only used when checking raw tx data through tx pusher-->
-                       <input type="text" name="xmraddress" size="120" placeholder="Recipient's BitTube address/subaddress" style="margin-top:5px"><br/>
+                        <input type="text" name="xmraddress" size="120" placeholder="Recipient's BitTube address/subaddress" class="form-control"><br/>
 
                         {{#enable_js}}
                             <!-- if have js, DONOT submit the form to server.
                                  change submit button, to just a button -->
-                            <button type="button" style="margin-top:5px" id="prove_btn">Prove sending</button>
+                            <button type="button" class="roseButton" id="prove_btn">Prove sending</button>
                         {{/enable_js}}
                         {{^enable_js}}
-                           <input type="submit" value="Prove sending" style="margin-top:5px">
+                           <input type="submit" value="Prove sending" class="roseButton">
                         {{/enable_js}}
-
+                        </div>
                     </form>
                 </div>
             </div>
@@ -155,7 +158,7 @@
     {{#enable_js}}
 
         <!-- to disply results from deconding and proving txs using js -->
-        <div id="decode-prove-results" class="center" style="width: 80%; margin-top:10px;border-style: dotted">
+        <div id="decode-prove-results" class="center" style="width: 80%; margin-top:50px;border-style: dotted">
 
         </div>
 

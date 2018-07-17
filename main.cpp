@@ -785,7 +785,7 @@ main(int ac, const char* av[])
         });
         CROW_ROUTE(app, "/q/height")
         ([&]() {
-            return std::to_string(xmreg::CurrentBlockchainStatus::current_height.load());
+            return std::to_string(core_storage->get_current_blockchain_height() - 1);
         });
         CROW_ROUTE(app, "/q/reward")
         ([&]() {

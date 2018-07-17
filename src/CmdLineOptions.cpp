@@ -37,6 +37,8 @@ namespace xmreg
                  "enable outputs key file checker")
                 ("enable-json-api", value<bool>()->default_value(false)->implicit_value(true),
                  "enable JSON REST api")
+                ("enable-legacy-api", value<bool>()->default_value(false)->implicit_value(true),
+                 "enable Legacy api")
                 ("enable-tx-cache", value<bool>()->default_value(false)->implicit_value(true),
                  "enable caching of transaction details")
                 ("show-cache-times", value<bool>()->default_value(false)->implicit_value(true),

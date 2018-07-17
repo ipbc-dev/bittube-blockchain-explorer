@@ -126,6 +126,7 @@ bittube-blockchain-explorer, BitTube Blockchain Explorer:
   --enable-output-key-checker [=arg(=1)] (=0)
                                         enable outputs key file checker
   --enable-json-api [=arg(=1)] (=1)     enable JSON REST api
+  --enable-legacy-api [=arg(=1)] (=1)   enable Legacy api
   --enable-tx-cache [=arg(=1)] (=0)     enable caching of transaction details
   --show-cache-times [=arg(=1)] (=0)    show times of getting data from cache
                                         vs no cache

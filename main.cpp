@@ -2,6 +2,7 @@
 
 
 #include "src/page.h"
+#include "src/rpccalls.h"
 
 #include "ext/crow/crow.h"
 #include "src/CmdLineOptions.h"
@@ -64,6 +65,7 @@ main(int ac, const char* av[])
     auto enable_js_opt                 = opts.get_option<bool>("enable-js");
     auto enable_mixin_details_opt      = opts.get_option<bool>("enable-mixin-details");
     auto enable_json_api_opt           = opts.get_option<bool>("enable-json-api");
+    auto enable_legacy_api_opt         = opts.get_option<bool>("enable-legacy-api");
     auto enable_tx_cache_opt           = opts.get_option<bool>("enable-tx-cache");
     auto enable_block_cache_opt        = opts.get_option<bool>("enable-block-cache");
     auto show_cache_times_opt          = opts.get_option<bool>("show-cache-times");
@@ -91,6 +93,7 @@ main(int ac, const char* av[])
     bool enable_output_key_checker    {*enable_output_key_checker_opt};
     bool enable_mixin_details         {*enable_mixin_details_opt};
     bool enable_json_api              {*enable_json_api_opt};
+    bool enable_legacy_api            {*enable_legacy_api_opt};
     bool enable_tx_cache              {*enable_tx_cache_opt};
     bool enable_block_cache           {*enable_block_cache_opt};
     bool enable_emission_monitor      {*enable_emission_monitor_opt};
@@ -769,6 +772,33 @@ main(int ac, const char* av[])
             uint64_t page_no {0};
             bool refresh_page {true};
             return xmrblocks.index2(page_no, refresh_page);
+        });
+    }
+
+    if (enable_legacy_api) {
+        CROW_ROUTE(app, "/q/hashrate")
+        ([&]() {
+            xmreg::rpccalls rpc {daemon_url};
+            xmreg::COMMAND_RPC_GET_INFO::response rpc_network_info;
+            if (!rpc.get_network_info(rpc_network_info)) throw std::runtime_error("Unable to get network info");
+            return std::to_string(rpc_network_info.difficulty / 120);
+        });
+        CROW_ROUTE(app, "/q/height")
+        ([&]() {
+            return std::to_string(xmreg::CurrentBlockchainStatus::current_height.load());
+        });
+        CROW_ROUTE(app, "/q/reward")
+        ([&]() {
+            uint64_t reward = 0, height = core_storage->get_current_blockchain_height() - 1;
+            cryptonote::block blk;
+            if (!mcore.get_block_by_height(height, blk)) throw std::runtime_error("Unable to fetch top block");
+            for (auto out : blk.miner_tx.vout) reward += out.amount;
+            return xmreg::xmr_amount_to_str(reward, "{:0.8f}");
+        });
+        CROW_ROUTE(app, "/q/supply")
+        ([&]() {
+            xmreg::CurrentBlockchainStatus::Emission emission = xmreg::CurrentBlockchainStatus::get_emission();
+            return xmreg::xmr_amount_to_str(emission.coinbase + emission.fee, "{:0.8f}");
         });
     }
 

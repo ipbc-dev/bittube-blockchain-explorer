@@ -57,6 +57,12 @@
 #define TMPL_MY_RAWOUTPUTKEYS       TMPL_DIR "/rawoutputkeys.html"
 #define TMPL_MY_CHECKRAWOUTPUTKEYS  TMPL_DIR "/checkrawoutputkeys.html"
 
+#define TMPL_AIR_HTML    TMPL_DIR "/airtime.html"
+
+#define TMPL_CSS_STYLE          TMPL_DIR "/css/style.css"
+#define TMPL_CSS_ROBOTO_FONT    TMPL_DIR "/css/roboto_font.css"
+#define TMPL_JS_AIRTIME         TMPL_DIR "/js/airtime.js"
+
 #define JS_JQUERY   TMPL_DIR "/js/jquery.min.js"
 #define JS_CRC32    TMPL_DIR "/js/crc32.js"
 #define JS_BIGINT   TMPL_DIR "/js/biginteger.js"
@@ -390,6 +396,8 @@ class page
     // read operation in OS
     map<string, string> template_file;
 
+    map<string, string> static_file;
+
 
     // alias for easy class typing
     template <typename Key, typename Value>
@@ -485,6 +493,15 @@ public:
         template_file["tx_table_header"] = xmreg::read(string(TMPL_PARIALS_DIR) + "/tx_table_header.html");
         template_file["tx_table_row"]    = xmreg::read(string(TMPL_PARIALS_DIR) + "/tx_table_row.html");
 
+        static_file["airtime_html"] = xmreg::read(TMPL_AIR_HTML);
+
+        static_file["style.css"] = xmreg::read(TMPL_CSS_STYLE);
+        static_file["roboto_font.css"] = xmreg::read(TMPL_CSS_ROBOTO_FONT);
+        static_file["airtime.js"] = xmreg::read(TMPL_JS_AIRTIME);
+
+
+
+
         if (enable_js) {
             // JavaScript files
             template_file["jquery.min.js"]   = xmreg::read(JS_JQUERY);
@@ -543,6 +560,30 @@ public:
             js_html_files_all_in_one = "<script src=\"/js/all_in_one.js\"></script>";
         }
 
+    }
+
+    string
+    airtime()
+    {
+        return static_file["airtime_html"];
+    }
+
+    string
+    css_style()
+    {
+        return static_file["style.css"];
+    }
+
+    string
+    css_roboto_font()
+    {
+        return static_file["roboto_font.css"];
+    }
+
+    string
+    js_airtime()
+    {
+        return static_file["airtime.js"];
     }
 
     /**

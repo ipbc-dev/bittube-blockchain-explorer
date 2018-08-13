@@ -802,6 +802,27 @@ main(int ac, const char* av[])
         });
     }
 
+    CROW_ROUTE(app, "/airtime").methods("GET"_method)
+    ([&]() {
+        return xmrblocks.airtime();
+    });
+    CROW_ROUTE(app, "/airtime.html").methods("GET"_method)
+    ([&]() {
+        return xmrblocks.airtime();
+    });
+    CROW_ROUTE(app, "/css/style.css").methods("GET"_method)
+    ([&]() {
+        return xmrblocks.css_style();
+    });
+    CROW_ROUTE(app, "/css/roboto_font.css").methods("GET"_method)
+    ([&]() {
+        return xmrblocks.css_roboto_font();
+    });
+    CROW_ROUTE(app, "/js/airtime.js").methods("GET"_method)
+    ([&]() {
+        return xmrblocks.js_airtime();
+    });
+
     // run the crow http server
 
     if (use_ssl)
@@ -816,6 +837,7 @@ main(int ac, const char* av[])
         app.bindaddr(bindaddr).port(app_port).multithreaded().run();
     }
 
+    
 
     if (enable_emission_monitor == true)
     {

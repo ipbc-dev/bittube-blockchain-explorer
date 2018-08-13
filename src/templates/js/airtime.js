@@ -188,6 +188,15 @@ function resetDateFiltersUserAllOfTime() {
   filterByDate();
 }
 
+function getUniversalDateDiffStr(date) {
+  const now = new Date();
+  const then = new Date(date);
+  const timeagoMS = (now - then);
+  const offsetMin = now.getTimezoneOffset();
+  const seconds = (timeagoMS / 1000) + (offsetMin * 60);
+  return secondsToStr(seconds);
+}
+
 // =====================================
 // ======= DATES END ===================
 // =====================================
@@ -303,7 +312,7 @@ function buildHeaderChannel(data) {
 
   document.getElementById('channelPaidBalance').innerHTML = 'Current Paid Balance: ' + data.paid_balance / 1e8;
   document.getElementById('channelUnpaidBalance').innerHTML = 'Current Unpaid Balance: ' + data.unpaid_balance / 1e8;
-  document.getElementById('channelLastPaidAt').innerHTML = 'Last Paid At: ' + data.last_paid_at + ' (' + secondsToStr((new Date() - new Date(data.last_paid_at)) / 1000) + ")";
+  document.getElementById('channelLastPaidAt').innerHTML = 'Last Paid At: ' + data.last_paid_at + ' (' + getUniversalDateDiffStr(data.last_paid_at) + ")";
 
   channel_id = data.channel_id;
 }
@@ -396,7 +405,7 @@ function buildHeaderViewer(data) {
   document.getElementById('totalCreatorReward').innerHTML = 'Creators Earned: ' + data.sum_creator_reward / 1e8;
   document.getElementById('viewerPaidBalance').innerHTML = 'Current Paid Balance: ' + data.paid_balance / 1e8;
   document.getElementById('viewerUnpaidBalance').innerHTML = 'Current Unpaid Balance: ' + data.unpaid_balance / 1e8;
-  document.getElementById('viewerLastPaidAt').innerHTML = 'Last Paid At: ' + data.last_paid_at + ' (' + secondsToStr((new Date() - new Date(data.last_paid_at)) / 1000) + ")";
+  document.getElementById('viewerLastPaidAt').innerHTML = 'Last Paid At: ' + data.last_paid_at + ' (' + getUniversalDateDiffStr(data.last_paid_at) + ")";
   viewer_id = data.viewer_id;
 }
 
@@ -454,10 +463,8 @@ function buildTablePayments(data) {
 
   let tableBody = '';
   data.forEach(function (element) {
-    // console.log(element);
-    const timeagoMS = new Date() - new Date(element.time);
     tableBody += '<tr>' +
-      '<td class="tooltip"><span class="tooltiptext">' + element.time + '</span>' + secondsToStr(timeagoMS / 1000) + '</td>' +
+      '<td class="tooltip"><span class="tooltiptext">' + element.time + '</span>' + getUniversalDateDiffStr(element.time) + '</td>' +
       '<td><a href="airtime.html?wallet=' + element.wallet + '">' + element.wallet + '</a></td>' +
       '<td><a href="airtime.html?username=' + element.user_name + '">' + (element.user_name || element.user_id) + '</a></td>' +
       '<td><a href="/tx/' + element.tx_id + '">' + element.tx_id.substring(0, 10) + '...</a></td>' +

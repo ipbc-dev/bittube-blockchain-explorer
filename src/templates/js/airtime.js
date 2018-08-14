@@ -184,6 +184,7 @@ function resetDateFiltersUser() {
 function resetDateFiltersUserAllOfTime() {
   resetDateFiltersStorage();
   localStorage.setItem('filterFrom', new Date(1));
+  localStorage.setItem('filterTo', new Date(4102444800000));
   setCurrentDateFilters();
   filterByDate();
 }

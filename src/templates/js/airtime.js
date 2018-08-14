@@ -20,6 +20,12 @@ const getStatsURL = 'https://airtime.bit.tube/getStats';
 // const getStatsURL = 'https://airtime-testing.bit.tube/getStats';
 // const getStatsURL = 'http://localhost:12346/getStats';
 
+let dateSeparator = '-'; // Sane Default
+
+if (navigator.vendor == 'Apple Computer, Inc.') {
+  dateSeparator = '/'; // IOS needs to be special, of course.
+}
+
 // =====================================
 // ======= DATE BEGIN ==================
 // =====================================
@@ -31,7 +37,7 @@ function dateToYYYYMMDD(date) {
   var d = date.getDate().toString();
   (d.length == 1) && (d = '0' + d);
   (m.length == 1) && (m = '0' + m);
-  var yyyymmdd = y + '-' + m + '-' + d;
+  var yyyymmdd = y + dateSeparator + m + dateSeparator + d;
   return yyyymmdd;
 }
 
@@ -690,7 +696,7 @@ function checkUrlParams() {
   const url_string = window.location.href;
   const parameterName = url_string.substring(url_string.lastIndexOf("?") + 1).split("&")[0].split('=')[0];
   const parameter = url_string.substring(url_string.lastIndexOf("?") + 1).split("&")[0].split('=')[1];
-  console.log('checkUrlParams', url_string, parameterName, parameter);
+  // console.log('checkUrlParams', url_string, parameterName, parameter);
   if (parameter != '' && parameter != undefined) {
     if (parameter.substring(0, 2) == 'bx' && parameter.length == 97) {
       // fetchDataWallet(parameter, 'searchWallet', 30, 0, dateStart, dateEnd);

@@ -22,9 +22,9 @@ const getStatsURL = 'https://airtime.bit.tube/getStats';
 
 let dateSeparator = '-'; // Sane Default
 
-if (navigator.vendor == 'Apple Computer, Inc.') {
-  dateSeparator = '/'; // IOS needs to be special, of course.
-}
+// if (navigator.vendor == 'Apple Computer, Inc.') {
+//   dateSeparator = '/'; // IOS needs to be special, of course.
+// }
 
 // =====================================
 // ======= DATE BEGIN ==================
@@ -47,6 +47,7 @@ function dateToHHMM(date) {
   let currentMinutes = date.getMinutes().toString();
   (currentHour.length == 1) && (currentHour = '0' + currentHour);
   (currentMinutes.length == 1) && (currentMinutes = '0' + currentMinutes);
+  // console.log('dateToHHMM', date, currentHour, currentMinutes);
   return currentHour + ':' + currentMinutes;
 }
 
@@ -187,10 +188,22 @@ function resetDateFiltersUser() {
   filterByDate();
 }
 
+function resetDateFiltersUserHour() {
+  resetDateFiltersStorage();
+  const end = new Date();
+  // end.setHours(end.getHours() - 1);
+  const start = new Date(end);
+  start.setHours(start.getHours() - 2);
+  localStorage.setItem('filterFrom', start);
+  localStorage.setItem('filterTo', end);
+  setCurrentDateFilters();
+  filterByDate();
+}
+
 function resetDateFiltersUserAllOfTime() {
   resetDateFiltersStorage();
-  localStorage.setItem('filterFrom', new Date(1));
-  localStorage.setItem('filterTo', new Date(4102444800000));
+  localStorage.setItem('filterFrom', (new Date(1)));
+  localStorage.setItem('filterTo', (new Date(4102444800000)));
   setCurrentDateFilters();
   filterByDate();
 }
@@ -202,6 +215,13 @@ function getUniversalDateDiffStr(date) {
   const offsetMin = now.getTimezoneOffset();
   const seconds = (timeagoMS / 1000) + (offsetMin * 60);
   return secondsToStr(seconds);
+}
+
+function localizeUTCString(date) {
+  const newDate = new Date(date);
+  // console.log(date, newDate, newDate.getTimezoneOffset());
+  newDate.setMinutes(newDate.getMinutes() + newDate.getTimezoneOffset());
+  return newDate;
 }
 
 // =====================================
@@ -317,9 +337,9 @@ function buildHeaderChannel(data) {
   document.getElementById('channelTotalViewerReward').innerHTML = 'Viewers Earned Total: ' + data.sum_viewer_reward / 1e8;
   document.getElementById('channelTotalCreatorReward').innerHTML = 'Creator Earned Total: ' + data.sum_creator_reward / 1e8;
 
-  document.getElementById('channelPaidBalance').innerHTML = 'Current Paid Balance: ' + data.paid_balance / 1e8;
-  document.getElementById('channelUnpaidBalance').innerHTML = 'Current Unpaid Balance: ' + data.unpaid_balance / 1e8;
-  document.getElementById('channelLastPaidAt').innerHTML = 'Last Paid At: ' + data.last_paid_at + ' (' + getUniversalDateDiffStr(data.last_paid_at) + ")";
+  document.getElementById('channelPaidBalance').innerHTML = 'Alltime Total Current Paid Balance: ' + data.paid_balance / 1e8;
+  document.getElementById('channelUnpaidBalance').innerHTML = 'Alltime Total Current Unpaid Balance: ' + data.unpaid_balance / 1e8;
+  // document.getElementById('channelLastPaidAt').innerHTML = 'Last Paid At: ' + data.last_paid_at + ' (' + getUniversalDateDiffStr(data.last_paid_at) + ")";
 
   channel_id = data.channel_id;
 }
@@ -410,9 +430,9 @@ function buildHeaderViewer(data) {
   document.getElementById('totalAirtime').innerHTML = 'Total AirTime: ' + secondsToStr(data.airtime);
   document.getElementById('totalViewerReward').innerHTML = 'Viewer Earned: ' + data.sum_viewer_reward / 1e8;
   document.getElementById('totalCreatorReward').innerHTML = 'Creators Earned: ' + data.sum_creator_reward / 1e8;
-  document.getElementById('viewerPaidBalance').innerHTML = 'Current Paid Balance: ' + data.paid_balance / 1e8;
-  document.getElementById('viewerUnpaidBalance').innerHTML = 'Current Unpaid Balance: ' + data.unpaid_balance / 1e8;
-  document.getElementById('viewerLastPaidAt').innerHTML = 'Last Paid At: ' + data.last_paid_at + ' (' + getUniversalDateDiffStr(data.last_paid_at) + ")";
+  document.getElementById('viewerPaidBalance').innerHTML = 'Alltime Total Current Paid Balance: ' + data.paid_balance / 1e8;
+  document.getElementById('viewerUnpaidBalance').innerHTML = 'Alltime Total Current Unpaid Balance: ' + data.unpaid_balance / 1e8;
+  // document.getElementById('viewerLastPaidAt').innerHTML = 'Last Paid At: ' + data.last_paid_at + ' (' + getUniversalDateDiffStr(data.last_paid_at) + ")";
   viewer_id = data.viewer_id;
 }
 
@@ -492,172 +512,219 @@ function buildTablePayments(data) {
 
 async function fetchDataUsername(term, searchType, pageSize, currentPage, dateStart = '', dateEnd = '') {
   const params = 'id=' + term + '&type=' + searchType + '&pageSize=' + pageSize + '&pageNumber=' + currentPage + '&dateStart=' + dateStart + '&dateEnd=' + dateEnd;
-  const data = JSON.parse(await DoRequest(getStatsURL, params)).stats;
+  const data = (await DoRequest(getStatsURL, params)).stats;
   if (data != false && data.length != 0) {
     currentPageCreators = currentPage;
     if (data.creators.length > 0) {
       buildTableCreators(data.creators);
     } else {
-      console.warn('fetchDataUsername -- No Creator Data!', data);
+      // console.warn('fetchDataUsername -- No Creator Data!', data);
     }
     if (data.viewers.length > 0) {
       buildTableViewers(data.viewers, searchType);
     } else {
       //document.getElementById('DivViewers').classList.add('hidden')
-      console.warn('fetchDataUsername -- No Viewer Data!', data);
+      // console.warn('fetchDataUsername -- No Viewer Data!', data);
     }
     return !(data.viewers.length === 0 && data.creators.length === 0);
   } else {
     // Show not data found
-    console.warn('fetchDataUsername -- No Data!', data);
+    // console.warn('fetchDataUsername -- No Data!', data);
     return false;
   }
 }
 
 async function fetchDataWallet(term, searchType, pageSize, currentPage, dateStart = '', dateEnd = '') {
   const params = 'id=' + term + '&type=' + searchType + '&pageSize=' + pageSize + '&pageNumber=' + currentPage + '&dateStart=' + dateStart + '&dateEnd=' + dateEnd;
-  const data = JSON.parse(await DoRequest(getStatsURL, params)).stats;
+  const data = (await DoRequest(getStatsURL, params)).stats;
   if (data != false && data.length != 0) {
     currentPageCreators = currentPage;
     if (data.creators.length > 0) {
       buildTableCreators(data.creators);
     } else {
-      console.warn('fetchDataWallet -- No Creator Data!', data);
+      // console.warn('fetchDataWallet -- No Creator Data!', data);
     }
     if (data.viewers.length > 0) {
       buildTableViewers(data.viewers, searchType);
     } else {
       //document.getElementById('DivViewers').classList.add('hidden')
-      console.warn('fetchDataWallet -- No Viewer Data!', data);
+      // console.warn('fetchDataWallet -- No Viewer Data!', data);
     }
     return !(data.viewers.length === 0 && data.creators.length === 0);
   } else {
     // Show not data found
-    console.warn('fetchDataWallet -- No Data!', data);
+    // console.warn('fetchDataWallet -- No Data!', data);
     return false;
   }
 }
 
 async function fetchDataCreators(term, searchType, pageSize, currentPage, dateStart = '', dateEnd = '') {
   const params = 'id=' + term + '&type=' + searchType + '&pageSize=' + pageSize + '&pageNumber=' + currentPage + '&dateStart=' + dateStart + '&dateEnd=' + dateEnd;
-  const data = JSON.parse(await DoRequest(getStatsURL, params)).stats;
+  const data = (await DoRequest(getStatsURL, params)).stats;
   if (data != false && data.length != 0) {
     currentPageCreators = currentPage;
     buildTableCreators(data);
     return true;
   } else {
     // Show not data found
-    console.warn('fetchDataCreators -- No Data!', data);
+    // console.warn('fetchDataCreators -- No Data!', data);
     return false;
   }
 }
 
 async function fetchDataVideo(term, searchType, pageSize, currentPage, dateStart = '', dateEnd = '') {
   const params = 'id=' + term + '&type=' + searchType + '&pageSize=' + pageSize + '&pageNumber=' + currentPage + '&dateStart=' + dateStart + '&dateEnd=' + dateEnd;
-  const data = JSON.parse(await DoRequest(getStatsURL, params)).stats;
+  const data = (await DoRequest(getStatsURL, params)).stats;
   if (data != false && data.length != 0) {
     currentPageVideo = currentPage;
     buildTableVideo(data, term);
     return true;
   } else {
     // Show not data found
-    console.warn('fetchDataVideo -- No Data!', data);
+    // console.warn('fetchDataVideo -- No Data!', data);
     return false;
   }
 }
 
 async function fetchDataViewers(term, searchType, pageSize, currentPage, dateStart = '', dateEnd = '') {
   const params = 'id=' + term + '&type=' + searchType + '&pageSize=' + pageSize + '&pageNumber=' + currentPage + '&dateStart=' + dateStart + '&dateEnd=' + dateEnd;
-  const data = JSON.parse(await DoRequest(getStatsURL, params)).stats;
+  const data = (await DoRequest(getStatsURL, params)).stats;
   if (data != false && data.length != 0) {
     currentPageViewers = currentPage;
     buildTableViewers(data, searchType);
     return true;
   } else {
     // Show not data found
-    console.warn('fetchDataViewers -- No Data!', data);
+    // console.warn('fetchDataViewers -- No Data!', data);
     return false;
   }
 }
 
 async function fetchHeaderData(term, dataType, searchType, dateStart = '', dateEnd = '') {
   const params = 'id=' + term + '&type=' + dataType + '&dateStart=' + dateStart + '&dateEnd=' + dateEnd;
-  const data = JSON.parse(await DoRequest(getStatsURL, params)).stats;
+  const data = (await DoRequest(getStatsURL, params)).stats;
   if (data != false && data.length != 0) {
     buildHeaderChannel(data[0]);
     return true;
   } else {
     // Show not data found
-    console.warn('fetchHeaderData -- No Data!', data);
+    // console.warn('fetchHeaderData -- No Data!', data);
     return false;
   }
 }
 
 async function fetchDataChannel(term, searchType, pageSize, currentPage, dateStart = '', dateEnd = '') {
   const params = 'id=' + term + '&type=' + searchType + '&pageSize=' + pageSize + '&pageNumber=' + currentPage + '&dateStart=' + dateStart + '&dateEnd=' + dateEnd;
-  const data = JSON.parse(await DoRequest(getStatsURL, params)).stats;
+  const data = (await DoRequest(getStatsURL, params)).stats;
   if (data != false && data.length != 0) {
     currentPageChannel = currentPage;
     buildTableChannel(data);
     return true;
   } else {
     // Show not data found
-    console.warn('fetchDataChannel -- No Data!', data);
+    // console.warn('fetchDataChannel -- No Data!', data);
     return false;
   }
 }
 
 async function fetchHeaderVideo(term, dataType, searchType, dateStart = '', dateEnd = '') {
   const params = 'id=' + term + '&type=' + dataType + '&dateStart=' + dateStart + '&dateEnd=' + dateEnd;
-  const data = JSON.parse(await DoRequest(getStatsURL, params)).stats;
+  const data = (await DoRequest(getStatsURL, params)).stats;
   if (data != false && data.length != 0) {
     buildHeaderVideo(data[0]);
     return true;
   } else {
     // Show not data found
-    console.warn('fetchHeaderVideo -- No Data!', data);
+    // console.warn('fetchHeaderVideo -- No Data!', data);
     return false;
   }
 }
 
 async function fetchHeaderViewer(term, dataType, searchType, dateStart = '', dateEnd = '') {
   const params = 'id=' + term + '&type=' + dataType + '&dateStart=' + dateStart + '&dateEnd=' + dateEnd;
-  const data = JSON.parse(await DoRequest(getStatsURL, params)).stats;
+  const data = (await DoRequest(getStatsURL, params)).stats;
   if (data != false && data.length != 0) {
     buildHeaderViewer(data[0]);
     return true;
   } else {
     // Show not data found
-    console.warn('fetchHeaderViewer -- No Data!', data);
+    // console.warn('fetchHeaderViewer -- No Data!', data);
     return false;
   }
 }
 
 async function fetchDataViewer(term, searchType, pageSize, currentPage, dateStart = '', dateEnd = '') {
   const params = 'id=' + term + '&type=' + searchType + '&pageSize=' + pageSize + '&pageNumber=' + currentPage + '&dateStart=' + dateStart + '&dateEnd=' + dateEnd;;
-  const data = JSON.parse(await DoRequest(getStatsURL, params)).stats;
+  const data = (await DoRequest(getStatsURL, params)).stats;
   if (data != false && data.length != 0) {
     currentPageChannel = currentPage;
     buildTableViewer(data, term);
     return true;
   } else {
     // Show not data found
-    console.warn('fetchDataViewer -- No Data!', data);
+    // console.warn('fetchDataViewer -- No Data!', data);
     return false;
   }
 }
 
 async function fetchOverviewPayments(pageSize, currentPage, dateStart = '', dateEnd = '') {
   const params = '&type=overviewPayments&pageSize=' + pageSize + '&pageNumber=' + currentPage + '&dateStart=' + dateStart + '&dateEnd=' + dateEnd;;
-  const data = JSON.parse(await DoRequest(getStatsURL, params)).stats;
+  const data = (await DoRequest(getStatsURL, params)).stats;
   if (data != false && data.length != 0) {
     currentPagePayments = currentPage;
     buildTablePayments(data);
     return true;
   } else {
     // Show not data found
-    console.warn('fetchOverviewPayments -- No Data!', data);
+    // console.warn('fetchOverviewPayments -- No Data!', data);
     return false;
+  }
+}
+
+function checKAPIErrors(data) {
+  const timespanTooShortError = "'dateStart' and 'dateEnd' delimit a timespan that is too small, adjusting 'dateStart' to default";
+  let filterChanged = false;
+  let msg = [];
+
+  if (data) {
+    if (data.warning) {
+      if (data.warning.indexOf(timespanTooShortError) !== -1) {
+        msg.push('Timespan Too Short Warning!');
+      }
+    }
+
+    if (data.dateStart) {
+      const fromLocal = getFilterFromDate();
+      const fromAPI = localizeUTCString(data.dateStart);
+      const diff = Math.abs(fromLocal - fromAPI);
+      if (diff > 60000) {
+        msg.push('dateStart Changed! ' + fromLocal + ' -> ' + fromAPI);
+        localStorage.setItem('filterFrom', fromAPI);
+        filterChanged = true;
+        flashRed('filterFromDIV');
+      }
+    }
+
+    if (data.dateEnd) {
+      const toLocal = getFilterToDate();
+      const toAPI = localizeUTCString(data.dateEnd);
+      const diff = Math.abs(toLocal - toAPI);
+      if (diff > 60000) {
+        msg.push('dateEnd Changed! ' + toLocal + ' -> ' + toAPI);
+        localStorage.setItem('filterTo', toAPI);
+        filterChanged = true;
+        flashRed('filterToDIV');
+      }
+    }
+  }
+
+  if (filterChanged) {
+    setCurrentDateFilters();
+    msg.push('Syncronized Filter with API');
+  }
+
+  if (msg.length > 1) {
+    console.warn('checkAPIErrors:', msg);
   }
 }
 
@@ -671,24 +738,23 @@ async function fetchOverviewPayments(pageSize, currentPage, dateStart = '', date
 
 function searchStats() {
   const parameter = document.getElementById('inputSearch').value;
-  console.log('Search', parameter);
   if (parameter != '') {
-    if (parameter.substring(0, 2) == 'bx' && parameter.length == 97) {
+    if (parameter.substring(0, 2) == 'bx' && parameter.length >= 97) {
       window.location.href = "airtime.html?wallet=" + parameter;
-      console.log('wallet');
+      // console.log('wallet', parameter);
     } else if ((parameter.substring(0, 2) == 'Qm' && parameter.length == 46) || (parameter.substring(0, 2) == 'BR' && parameter.length == 20)) {
       window.location.href = "airtime.html?video=" + parameter;
-      console.log('video');
+      // console.log('video', parameter);
     } else if (parameter.substring(0, 2).toLowerCase() == 'at') {
       window.location.href = "airtime.html?viewer_id=" + parameter.substring(2);
-      console.log('viewer_id');
+      // console.log('viewer_id', parameter);
     } else {
       window.location.href = "airtime.html?username=" + parameter;
-      console.log('username');
+      // console.log('username', parameter);
     }
   } else {
     window.location.href = "airtime.html"
-    console.log('none');
+    // console.log('none', parameter);
   }
 }
 
@@ -844,6 +910,7 @@ async function drawUsernameSearch(userName, page = 0) {
 // ======= UTILITY BEGIN ===============
 // =====================================
 function clearStorage() {
+  // console.log('UNLOAD HREF', window.location.href);
   if (window.location.href.indexOf('airtime.html') === -1) {
     // console.log('CLEAR STORAGE', window.location.href);
     resetDateFiltersStorage();
@@ -861,7 +928,14 @@ function DoRequest(url, params) {
     http.onreadystatechange = function () { // Call a function when the state changes.
       if (http.readyState == 4 && http.status == 200) {
         // console.log('DoRequest', url, params, http.status);
-        resolve(http.responseText);
+        try {
+          const data = JSON.parse(http.responseText);
+          checKAPIErrors(data);
+          resolve(data);
+        } catch (err) {
+          console.warn('DoRequest JSON Parse Error:', err);
+          reject(err);
+        }
       } else if (http.readyState == 4) {
         reject(new Error('DoRequest - Got Bad Status:' + http.status + ' - ' + http.statusText));
       }
@@ -930,6 +1004,19 @@ function setVisibleElemName(elemName, setToVisible) {
       elem.classList.add('hidden');
     }
   }
+}
+
+function flashRed(elem_name) {
+  if (!elem_name) return;
+  const elem = document.getElementById(elem_name);
+  if (!elem) return;
+  elem.style.transition = 'background-color 500ms ease-out';
+  elem.style.setProperty('background-color', 'red', 'important');
+
+  setTimeout(() => {
+    elem.style.transition = 'background-color 2500ms linear';
+    elem.style.setProperty('background-color', '', '');
+  }, 500);
 }
 
 // =====================================

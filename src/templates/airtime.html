@@ -56,7 +56,7 @@
           />
         </svg>
         <label class="labelExplorer"> | AirTime Explorer |</label>
-        <a class="labelExplorer" style="margin-left: 0px;" href='./'>Blockchain Explorer</a>
+        <a class="labelExplorer" style="margin-left: 0px;" href='/'>Blockchain Explorer</a>
       </a>
     </div>
     <!-- End div logo -->
@@ -64,7 +64,7 @@
     <div class="divSearchNavbar">
       <div style="width:100%;" class="style-1 formNavbar">
         <div class="form-group searchCenter">
-          <form onsubmit="searchStats()">
+          <form action="javascript:searchStats()">
             <input type="text" name="value" size="120" placeholder="username, wallet, ipfs hash, airtime id" id="inputSearch" class="inputSearch form-control">
           </form>
           <button id="searchButton" type="submit" value="Search" class="buttonSearch" onclick="searchStats()">
@@ -84,7 +84,7 @@
     </div>
     <div class="center" id="filterContainer">
       <div class="divDataFiler">
-        <div class="divDataFrom">
+        <div id="filterFromDIV" class="divDataFrom">
           <div class="divDate">
             <label for="datefrom" class="DatePicker">Date From</label>
             <input type="date" name="datefrom" id="datefrom" class="DatePicker">
@@ -95,7 +95,7 @@
           </div>
         </div>
 
-        <div class="divDataFrom">
+        <div id="filterToDIV" class="divDataFrom">
           <div class="divDate">
             <label for="dateTo" class="DatePicker">Date To</label>
             <input type="date" name="dateTo" id="dateTo" class="DatePicker">
@@ -108,6 +108,7 @@
         </div>
         <div class="DivButtonFiler">
           <button type="button" data-call="channel" class="roseButton filterButton" id="dateFilter" onClick="filterByDate()">Filter</button>
+          <!-- <button type="button" id="dateFilterReset" class="roseButton filterButton" onClick="resetDateFiltersUserHour()">Last Hour</button> -->
           <button type="button" id="dateFilterReset" class="roseButton filterButton" onClick="resetDateFiltersUser()">Last 24 Hours</button>
           <button type="button" id="dateFilterReset" class="roseButton filterButton" onClick="resetDateFiltersUserAllOfTime()">All of Time</button>
         </div>
@@ -148,8 +149,9 @@
       <h5 id="channelWallet" style="margin:5px"></h5>
       <h5 id="channelUnpaidBalance" style="margin:5px;"></h5>
       <h5 id="channelPaidBalance" style="margin:5px;"></h5>
-      <h5 id="channelLastPaidAt" style="margin:5px;"></h5>
+      <!-- <h5 id="channelLastPaidAt" style="margin:5px;"></h5> -->
       <br>
+      <h5 style="margin:5px;">Time Filtered Stats:</h5>
       <h5 id="channelTotalCreatorReward" style="margin:5px;"></h5>
       <h5 id="channelTotalViewerReward" style="margin:5px;"></h5>
       <h5 id="channelTotalVideos" style="margin:5px"></h5>
@@ -178,8 +180,9 @@
       <h5 id="viewerWallet" style="margin:5px"></h5>
       <h5 id="viewerUnpaidBalance" style="margin:5px;"></h5>
       <h5 id="viewerPaidBalance" style="margin:5px;"></h5>
-      <h5 id="viewerLastPaidAt" style="margin:5px;"></h5>
+      <!-- <h5 id="viewerLastPaidAt" style="margin:5px;"></h5> -->
       <br>
+      <h5 style="margin:5px;">Time Filtered Stats:</h5>
       <h5 id="totalVideosWatched" style="margin:5px"></h5>
       <h5 id="totalCreatorReward" style="margin:5px;"></h5>
       <h5 id="totalViewerReward" style="margin:5px;"></h5>

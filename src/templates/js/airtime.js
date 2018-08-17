@@ -959,20 +959,20 @@ function millisecondsToStr(milliseconds) {
 
   var temp = Math.floor(milliseconds / 1000);
   var years = round(temp / 31536000);
-  if (years > 1) {
+  if (years >= 1) {
     return years + ' year' + numberEnding(years);
   }
   //TODO: Months! Maybe weeks? 
   var days = round((temp %= 31536000) / 86400);
-  if (days > 1) {
+  if (days >= 1) {
     return days + ' day' + numberEnding(days);
   }
   var hours = round((temp %= 86400) / 3600);
-  if (hours > 1) {
+  if (hours >= 1) {
     return hours + ' hour' + numberEnding(hours);
   }
   var minutes = round((temp %= 3600) / 60);
-  if (minutes > 1) {
+  if (minutes >= 1) {
     return minutes + ' minute' + numberEnding(minutes);
   }
   var seconds = temp % 60;

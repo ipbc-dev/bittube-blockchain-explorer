@@ -767,7 +767,7 @@ function checkUrlParams() {
     if (parameter.substring(0, 2) == 'bx' && parameter.length == 97) {
       // fetchDataWallet(parameter, 'searchWallet', 30, 0, dateStart, dateEnd);
       drawWalletSearch(parameter);
-    } else if ((parameter.substring(0, 2) == 'Qm' && parameter.length == 46) || (parameter.substring(0, 2) == 'BR' && parameter.length == 20)) {
+    } else if (parameterName === 'video' || (parameter.substring(0, 2) == 'Qm' && parameter.length == 46) || (parameter.substring(0, 2) == 'BR' && parameter.length == 20)) {
       drawVideo(parameter);
     } else if (parameter.substring(0, 2).toLowerCase() == 'at') {
       drawViewer(parameter.substring(2));

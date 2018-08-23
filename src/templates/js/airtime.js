@@ -333,13 +333,22 @@ function buildHeaderChannel(data) {
   document.getElementById('channelName').innerHTML = 'Channel: ' + data.channel_name;
   document.getElementById('channelTotalVideos').innerHTML = 'Total Videos: ' + data.videos;
   document.getElementById('channelWallet').innerHTML = 'Wallet: ' + data.wallet;
-  document.getElementById('channelTotalAirTime').innerHTML = 'Total AirTime: ' + secondsToStr(data.airtime);
-  document.getElementById('channelTotalViewerReward').innerHTML = 'Viewers Earned Total: ' + data.sum_viewer_reward / 1e8;
-  document.getElementById('channelTotalCreatorReward').innerHTML = 'Creator Earned Total: ' + data.sum_creator_reward / 1e8;
 
-  document.getElementById('channelPaidBalance').innerHTML = 'Alltime Total Current Paid Balance: ' + data.paid_balance / 1e8;
-  document.getElementById('channelUnpaidBalance').innerHTML = 'Alltime Total Current Unpaid Balance: ' + data.unpaid_balance / 1e8;
-  // document.getElementById('channelLastPaidAt').innerHTML = 'Last Paid At: ' + data.last_paid_at + ' (' + getUniversalDateDiffStr(data.last_paid_at) + ")";
+  if (!data.blacklisted) {
+    document.getElementById('channelTotalAirTime').innerHTML = 'Total AirTime: ' + secondsToStr(data.airtime);
+    document.getElementById('channelTotalViewerReward').innerHTML = 'Viewers Earned Total: ' + data.sum_viewer_reward / 1e8;
+    document.getElementById('channelTotalCreatorReward').innerHTML = 'Creator Earned Total: ' + data.sum_creator_reward / 1e8;
+    document.getElementById('channelPaidBalance').innerHTML = 'Alltime Total Current Paid Balance: ' + data.paid_balance / 1e8;
+    document.getElementById('channelUnpaidBalance').innerHTML = 'Alltime Total Current Unpaid Balance: ' + data.unpaid_balance / 1e8;
+    // document.getElementById('channelLastPaidAt').innerHTML = 'Last Paid At: ' + data.last_paid_at + ' (' + getUniversalDateDiffStr(data.last_paid_at) + ")";
+  } else {
+    document.getElementById('channelTotalAirTime').innerHTML = '';
+    document.getElementById('channelTotalViewerReward').innerHTML = '';
+    document.getElementById('channelTotalCreatorReward').innerHTML = '';
+    document.getElementById('channelPaidBalance').innerHTML = 'No rewards will be paid out.';
+    document.getElementById('channelUnpaidBalance').innerHTML = '<h1>THIS CHANNEL IS BLACKLISTED</h1>';
+  }
+  
 
   channel_id = data.channel_id;
 }
@@ -381,10 +390,17 @@ function buildHeaderVideo(data) {
   document.getElementById('videoHash').innerHTML = 'Video Hash: ' + data.video_hash;
   document.getElementById('channelName').innerHTML = 'Channel Name: ' + data.channel_name;
   document.getElementById('videoWallet').innerHTML = 'Wallet: ' + data.wallet;
-  document.getElementById('totalVideoAirtime').innerHTML = 'Total AirTime: ' + secondsToStr(data.airtime);
-  document.getElementById('totalVideoViewers').innerHTML = 'Total Viewers: ' + data.viewers;
-  document.getElementById('totalVideoCreatorReward').innerHTML = 'Creator Earned Total: ' + data.sum_creator_reward / 1e8;
-  document.getElementById('totalVideoViewerReward').innerHTML = 'Viewers Earned Total: ' + data.sum_viewer_reward / 1e8;
+  if (!data.blacklisted) {
+    document.getElementById('totalVideoAirtime').innerHTML = 'Total AirTime: ' + secondsToStr(data.airtime);
+    document.getElementById('totalVideoViewers').innerHTML = 'Total Viewers: ' + data.viewers;
+    document.getElementById('totalVideoCreatorReward').innerHTML = 'Creator Earned Total: ' + data.sum_creator_reward / 1e8;
+    document.getElementById('totalVideoViewerReward').innerHTML = 'Viewers Earned Total: ' + data.sum_viewer_reward / 1e8;
+  } else {
+    document.getElementById('totalVideoAirtime').innerHTML = '<h1>THIS VIDEO IS BLACKLISTED</h1>';
+    document.getElementById('totalVideoViewers').innerHTML = 'No rewards will be paid out.';
+    document.getElementById('totalVideoCreatorReward').innerHTML = '';
+    document.getElementById('totalVideoViewerReward').innerHTML = '';
+  }
 }
 
 async function tableVideoTurnPage(offset, videoID) {
@@ -426,13 +442,23 @@ function buildHeaderViewer(data) {
   document.getElementById('viewerName').innerHTML = 'Username: ' + data.viewer_name;
   document.getElementById('viewerID').innerHTML = 'Airtime ID: AT' + data.viewer_id;
   document.getElementById('viewerWallet').innerHTML = 'Wallet: ' + data.wallet;
-  document.getElementById('totalVideosWatched').innerHTML = 'Total videos watched: ' + data.videos;
-  document.getElementById('totalAirtime').innerHTML = 'Total AirTime: ' + secondsToStr(data.airtime);
-  document.getElementById('totalViewerReward').innerHTML = 'Viewer Earned: ' + data.sum_viewer_reward / 1e8;
-  document.getElementById('totalCreatorReward').innerHTML = 'Creators Earned: ' + data.sum_creator_reward / 1e8;
-  document.getElementById('viewerPaidBalance').innerHTML = 'Alltime Total Current Paid Balance: ' + data.paid_balance / 1e8;
-  document.getElementById('viewerUnpaidBalance').innerHTML = 'Alltime Total Current Unpaid Balance: ' + data.unpaid_balance / 1e8;
-  // document.getElementById('viewerLastPaidAt').innerHTML = 'Last Paid At: ' + data.last_paid_at + ' (' + getUniversalDateDiffStr(data.last_paid_at) + ")";
+
+  if (!data.blacklisted) {
+    document.getElementById('totalVideosWatched').innerHTML = 'Total videos watched: ' + data.videos;
+    document.getElementById('totalAirtime').innerHTML = 'Total AirTime: ' + secondsToStr(data.airtime);
+    document.getElementById('totalViewerReward').innerHTML = 'Viewer Earned: ' + data.sum_viewer_reward / 1e8;
+    document.getElementById('totalCreatorReward').innerHTML = 'Creators Earned: ' + data.sum_creator_reward / 1e8;
+    document.getElementById('viewerPaidBalance').innerHTML = 'Alltime Total Current Paid Balance: ' + data.paid_balance / 1e8;
+    document.getElementById('viewerUnpaidBalance').innerHTML = 'Alltime Total Current Unpaid Balance: ' + data.unpaid_balance / 1e8;
+    // document.getElementById('viewerLastPaidAt').innerHTML = 'Last Paid At: ' + data.last_paid_at + ' (' + getUniversalDateDiffStr(data.last_paid_at) + ")";
+  } else {
+    document.getElementById('totalVideosWatched').innerHTML = '';
+    document.getElementById('totalAirtime').innerHTML = '';
+    document.getElementById('totalViewerReward').innerHTML = '';
+    document.getElementById('totalCreatorReward').innerHTML = '';
+    document.getElementById('viewerPaidBalance').innerHTML = 'No rewards will be paid out.';
+    document.getElementById('viewerUnpaidBalance').innerHTML = '<h1>THIS VIEWER IS BLACKLISTED</h1>';
+  }
   viewer_id = data.viewer_id;
 }
 

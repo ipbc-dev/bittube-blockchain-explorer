@@ -375,7 +375,7 @@ function buildTableChannel(data) {
 
   let tableBody = '';
   data.forEach(function (element) {
-    tableBody += '<tr>' +
+    tableBody += (element.blacklisted ? '<tr style="background: darkred; color: white">' : '<tr>') +
       '<td><a href="airtime.html?video=' + element.video_hash + '">' + element.video_hash + '</a></td>' +
       '<td>' + secondsToStr(element.airtime) + '</td>' +
       '<td>' + element.viewers + '</td>' +
@@ -483,7 +483,7 @@ function buildTableViewer(data) {
 
   let tableBody = '';
   data.forEach(function (element) {
-    tableBody += '<tr>' +
+    tableBody += (element.blacklisted ? '<tr style="background: darkred; color: white">' : '<tr>') +
       '<td><a href="airtime.html?video=' + element.video_hash + '">' + element.video_hash + '</a></td>' +
       '<td>' + secondsToStr(element.airtime) + '</td>' +
       '<td>' + element.sum_viewer_reward / 1e8 + '</td>' +

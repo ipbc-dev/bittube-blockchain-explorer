@@ -937,10 +937,30 @@ async function drawUsernameSearch(userName, page = 0) {
 // =====================================
 function clearStorage() {
   // console.log('UNLOAD HREF', window.location.href);
-  if (window.location.href.indexOf('airtime.html') === -1) {
-    // console.log('CLEAR STORAGE', window.location.href);
+  // if (window.location.href.indexOf('airtime.html') === -1) {
+    console.log('CLEAR STORAGE'); // , window.location.href
     resetDateFiltersStorage();
+  // }
+}
+
+function updateLastAct() {
+  // console.log('updateLastAct');
+  localStorage.setItem('lastAct', Date.now());
+}
+
+function checkLastAct() {
+  let clear = true;
+  try {
+    const lastUnloadDate = new Date(parseInt(localStorage.getItem('lastAct'), 10));
+    // console.log(new Date() - lastUnloadDate);
+    if (new Date() - lastUnloadDate < 1000 * 60 * 5) {
+      clear = false;
+    }
+  } catch (err) {
+    // console.error(err);
   }
+  // console.log('checkLastAct', clear);
+  if (clear) clearStorage();
 }
 
 function DoRequest(url, params) {
@@ -1048,3 +1068,9 @@ function flashRed(elem_name) {
 // =====================================
 // ======= UTILITY END =================
 // =====================================
+
+function onload() {
+  document.addEventListener('mousemove', () => {
+    updateLastAct();
+  }, {passive: true, capture: false});
+}

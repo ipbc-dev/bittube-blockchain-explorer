@@ -10,7 +10,7 @@
   <script type="text/javascript" src="js/airtime.js"></script>
 </head>
 
-<body onload="setCurrentDateFilters(); checkUrlParams();" onunload="clearStorage();">
+<body onload="checkLastAct(); setCurrentDateFilters(); checkUrlParams(); onload();" onunload="updateLastAct();">
   <!-- Start div navbar -->
   <div class="navbarFixed">
     <!-- Start div logo -->
@@ -109,8 +109,8 @@
         <div class="DivButtonFiler">
           <button type="button" data-call="channel" class="roseButton filterButton" id="dateFilter" onClick="filterByDate()">Filter</button>
           <!-- <button type="button" id="dateFilterReset" class="roseButton filterButton" onClick="resetDateFiltersUserHour()">Last Hour</button> -->
-          <button type="button" id="dateFilterReset" class="roseButton filterButton" onClick="resetDateFiltersUser()">Last 24 Hours</button>
-          <button type="button" id="dateFilterReset" class="roseButton filterButton" onClick="resetDateFiltersUserAllOfTime()">All of Time</button>
+          <!-- <button type="button" id="dateFilterReset" class="roseButton filterButton" onClick="resetDateFiltersUser()">Last 24 Hours</button> -->
+          <!-- <button type="button" id="dateFilterReset" class="roseButton filterButton" onClick="resetDateFiltersUserAllOfTime()">All of Time</button> -->
         </div>
       </div>
     </div>

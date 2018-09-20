@@ -813,6 +813,7 @@ function checkUrlParams() {
 
 async function drawOverview(page = 0) {
   resetVisibility();
+  resetContent();
   setVisibleElemName(ELEM_SPINNER, true);
 
   const dateStart = getStoredFromDate();
@@ -834,6 +835,7 @@ async function drawOverview(page = 0) {
 
 async function drawChannel(channelID, page = 0) {
   resetVisibility();
+  resetContent();
   setVisibleElemName(ELEM_SPINNER, true);
 
   const dateStart = getStoredFromDate();
@@ -854,6 +856,7 @@ async function drawChannel(channelID, page = 0) {
 
 async function drawVideo(videoID, page = 0) {
   resetVisibility();
+  resetContent();
   setVisibleElemName(ELEM_SPINNER, true);
 
   const dateStart = getStoredFromDate();
@@ -874,6 +877,7 @@ async function drawVideo(videoID, page = 0) {
 
 async function drawViewer(viewerID, page = 0) {
   resetVisibility();
+  resetContent();
   setVisibleElemName(ELEM_SPINNER, true);
 
   const dateStart = getStoredFromDate();
@@ -894,6 +898,7 @@ async function drawViewer(viewerID, page = 0) {
 
 async function drawWalletSearch(wallet, page = 0) {
   resetVisibility();
+  resetContent();
   setVisibleElemName(ELEM_SPINNER, true);
 
   const dateStart = getStoredFromDate();
@@ -1036,6 +1041,13 @@ function resetVisibility() {
   const elements = [ELEM_OVERVIEW_CONTAINER, ELEM_CHANNEL_CONTAINER, ELEM_VIDEO_CONTAINER, ELEM_VIEWER_CONTAINER, ELEM_SPINNER, ELEM_NODATA, ELEM_PAYMENTS_CONTAINER];
   elements.forEach((elemName) => {
     setVisibleElemName(elemName, false);
+  });
+}
+
+function resetContent() {
+  const elements = ["airtimeTableVideo", "airtimeTablePayments", "airtimeTableChannel", "airtimeTableCreators", "airtimeTableViewer", "airtimeTableViewers", "pagesCreators", "pagesViewers", "pagesPayments", "pagesChannel", "pagesVideo", "pagesViewer"];
+  elements.forEach((elemName) => {
+    document.getElementById(elemName).innerHTML = "";
   });
 }
 

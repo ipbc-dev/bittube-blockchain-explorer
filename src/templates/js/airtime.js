@@ -57,7 +57,7 @@ function getCurrentDate() {
 
 function getCurrentDateMinusADay() {
   const date = new Date();
-  date.setHours(date.getHours() - 24);
+  date.setHours(date.getHours() - 26);
   return dateToYYYYMMDD(date);
 }
 
@@ -148,7 +148,7 @@ function getStoredFromDate() {
     return storedFilterFromDate;
   } else {
     const date = new Date();
-    date.setHours(date.getHours() - 24);
+    date.setHours(date.getHours() - 26);
     return date;
   }
 }

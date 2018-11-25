@@ -179,7 +179,7 @@ MempoolStatus::read_mempool()
 
         double tx_size =  static_cast<double>(_tx_info.blob_size)/1024.0;
 
-        double payed_for_kB = XMR_AMOUNT(_tx_info.fee) / tx_size;
+        double payed_for_kB = XTA_AMOUNT(_tx_info.fee) / tx_size;
 
         last_tx.receive_time = _tx_info.receive_time;
 
@@ -276,7 +276,7 @@ MempoolStatus::read_network_info()
     local_copy.target_height              = rpc_network_info.target_height;
     local_copy.difficulty                 = rpc_network_info.difficulty;
     local_copy.target                     = rpc_network_info.target;
-    local_copy.hash_rate                  = (rpc_network_info.difficulty/rpc_network_info.target);
+    local_copy.hash_rate                  = (rpc_network_info.difficulty/120);
     local_copy.tx_count                   = rpc_network_info.tx_count;
     local_copy.tx_pool_size               = rpc_network_info.tx_pool_size;
     local_copy.alt_blocks_count           = rpc_network_info.alt_blocks_count;
@@ -341,8 +341,8 @@ MempoolStatus::is_thread_running()
     return is_running;
 }
 
-bf::path MempoolStatus::blockchain_path {"/home/mwo/.bitmonero/lmdb"};
-string MempoolStatus::deamon_url {"http:://127.0.0.1:18081"};
+bf::path MempoolStatus::blockchain_path {"/home/mwo/.italo/lmdb"};
+string MempoolStatus::deamon_url {"http:://127.0.0.1:13102"};
 cryptonote::network_type MempoolStatus::nettype {cryptonote::network_type::MAINNET};
 atomic<bool>       MempoolStatus::is_running {false};
 boost::thread      MempoolStatus::m_thread;

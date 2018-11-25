@@ -2,12 +2,12 @@
 // Created by mwo on 5/11/15.
 //
 
-#ifndef XMREG01_MICROCORE_H
-#define XMREG01_MICROCORE_H
+#ifndef XTAEG01_MICROCORE_H
+#define XTAEG01_MICROCORE_H
 
 #include <iostream>
 
-#include "monero_headers.h"
+#include "italo_headers.h"
 #include "tools.h"
 
 namespace xmreg
@@ -90,4 +90,4 @@ namespace xmreg
 
 
 
-#endif //XMREG01_MICROCORE_H
+#endif //XTAEG01_MICROCORE_H

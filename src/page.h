@@ -2,14 +2,14 @@
 // Created by mwo on 8/04/16.
 //
 
-#ifndef CROWXMR_PAGE_H
-#define CROWXMR_PAGE_H
+#ifndef CROWXTA_PAGE_H
+#define CROWXTA_PAGE_H
 
 
 
 #include "mstch/mstch.hpp"
 
-#include "monero_headers.h"
+#include "italo_headers.h"
 
 #include "../gen/version.h"
 
@@ -247,7 +247,7 @@ struct tx_details
         string fee_micro_str {"N/A"};
         string payed_for_kB_micro_str {""};
 
-        const double& xmr_amount = XMR_AMOUNT(fee);
+        const double& xmr_amount = XTA_AMOUNT(fee);
 
         // tx size in kB
         double tx_size =  static_cast<double>(size)/1024.0;
@@ -571,7 +571,7 @@ index2(uint64_t page_no = 0, bool refresh_page = false)
     {
         json j_info;
 
-        get_monero_network_info(j_info);
+        get_italo_network_info(j_info);
 
         return j_info;
     });
@@ -1774,7 +1774,7 @@ show_my_outputs(string tx_hash_str,
 
     if (xmr_address_str.empty())
     {
-        return string("Monero address not provided!");
+        return string("Italo address not provided!");
     }
 
     if (viewkey_str.empty())
@@ -1794,7 +1794,7 @@ show_my_outputs(string tx_hash_str,
         return string("Cant get tx hash due to parse error: " + tx_hash_str);
     }
 
-    // parse string representing given monero address
+    // parse string representing given italo address
     cryptonote::address_parse_info address_info;
 
     if (!xmreg::parse_str_address(xmr_address_str,  address_info, nettype))
@@ -2906,7 +2906,7 @@ show_checkrawtx(string raw_tx_data, string action)
 
             // ok, so its not signed tx data. but maybe it is raw tx data
             // used in rpc call "/sendrawtransaction". This is for example
-            // used in mymonero and openmonero projects.
+            // used in myitalo and openitalo projects.
 
             // to check this, first we need to encode data back to base64.
             // the reason is that txs submited to "/sendrawtransaction"
@@ -3271,7 +3271,7 @@ show_pushrawtx(string raw_tx_data, string action)
         ptx_vector.push_back({});
         ptx_vector.back().tx = parsed_tx;
     }
-    // if failed, treat raw_tx_data as base64 encoding of signed_monero_tx
+    // if failed, treat raw_tx_data as base64 encoding of signed_italo_tx
     else
     {
         string decoded_raw_tx_data = epee::string_encoding::base64_decode(raw_tx_data);
@@ -3925,11 +3925,11 @@ search(string search_text)
     result_html = default_txt;
 
 
-    // check if monero address is given based on its length
+    // check if italo address is given based on its length
     // if yes, then we can only show its public components
     if (search_str_length == 95)
     {
-        // parse string representing given monero address
+        // parse string representing given italo address
         address_parse_info address_info;
 
         cryptonote::network_type nettype_addr {cryptonote::network_type::MAINNET};
@@ -3949,7 +3949,7 @@ search(string search_text)
         return show_address_details(address_info, nettype_addr);
     }
 
-    // check if integrated monero address is given based on its length
+    // check if integrated italo address is given based on its length
     // if yes, then show its public components search tx based on encrypted id
     if (search_str_length == 106)
     {
@@ -4470,7 +4470,7 @@ json_rawtransaction(string tx_hash_str)
         }
     }
 
-    // get raw tx json as in monero
+    // get raw tx json as in italo
 
     try
     {
@@ -4758,7 +4758,7 @@ json_rawblock(string block_no_or_hash)
         return j_response;
     }
 
-    // get raw tx json as in monero
+    // get raw tx json as in italo
 
     try
     {
@@ -5102,7 +5102,7 @@ json_outputs(string tx_hash_str,
     if (address_str.empty())
     {
         j_response["status"]  = "error";
-        j_response["message"] = "Monero address not provided";
+        j_response["message"] = "Italo address not provided";
         return j_response;
     }
 
@@ -5133,13 +5133,13 @@ json_outputs(string tx_hash_str,
         return j_response;
     }
 
-    // parse string representing given monero address
+    // parse string representing given italo address
     address_parse_info address_info;
 
     if (!xmreg::parse_str_address(address_str,  address_info, nettype))
     {
         j_response["status"]  = "error";
-        j_response["message"] = "Cant parse monero address: " + address_str;
+        j_response["message"] = "Cant parse italo address: " + address_str;
         return j_response;
 
     }
@@ -5327,7 +5327,7 @@ json_outputsblocks(string _limit,
     if (address_str.empty())
     {
         j_response["status"]  = "error";
-        j_response["message"] = "Monero address not provided";
+        j_response["message"] = "Italo address not provided";
         return j_response;
     }
 
@@ -5338,13 +5338,13 @@ json_outputsblocks(string _limit,
         return j_response;
     }
 
-    // parse string representing given monero address
+    // parse string representing given italo address
     address_parse_info address_info;
 
     if (!xmreg::parse_str_address(address_str, address_info, nettype))
     {
         j_response["status"]  = "error";
-        j_response["message"] = "Cant parse monero address: " + address_str;
+        j_response["message"] = "Cant parse italo address: " + address_str;
         return j_response;
 
     }
@@ -5490,10 +5490,10 @@ json_networkinfo()
     json j_info;
 
     // get basic network info
-    if (!get_monero_network_info(j_info))
+    if (!get_italo_network_info(j_info))
     {
         j_response["status"]  = "error";
-        j_response["message"] = "Cant get monero network info";
+        j_response["message"] = "Cant get italo network info";
         return j_response;
     }
 
@@ -5582,7 +5582,7 @@ json_version()
             {"last_git_commit_hash", string {GIT_COMMIT_HASH}},
             {"last_git_commit_date", string {GIT_COMMIT_DATETIME}},
             {"git_branch_name"     , string {GIT_BRANCH_NAME}},
-            {"monero_version_full" , string {MONERO_VERSION_FULL}},
+            {"italo_version_full" , string {MONERO_VERSION_FULL}},
             {"api"                 , ONIONEXPLORER_RPC_VERSION},
             {"blockchain_height"   , core_storage->get_current_blockchain_height()}
     };
@@ -5911,7 +5911,7 @@ construct_tx_context(transaction tx, uint16_t with_ring_signatures = 0)
 
     double tx_size = static_cast<double>(txd.size) / 1024.0;
 
-    double payed_for_kB = XMR_AMOUNT(txd.fee) / tx_size;
+    double payed_for_kB = XTA_AMOUNT(txd.fee) / tx_size;
 
     // initalise page tempate map with basic info about blockchain
     mstch::map context {
@@ -6363,7 +6363,7 @@ get_tx_details(const transaction& tx,
     // get tx public key from extra
     // this check if there are two public keys
     // due to previous bug with sining txs:
-    // https://github.com/monero-project/monero/pull/1358/commits/7abfc5474c0f86e16c405f154570310468b635c2
+    // https://github.com/italo-project/italo/pull/1358/commits/7abfc5474c0f86e16c405f154570310468b635c2
     txd.pk = xmreg::get_tx_pub_key_from_received_outs(tx);
     txd.additional_pks = cryptonote::get_additional_tx_pub_keys_from_extra(tx);
 
@@ -6578,7 +6578,7 @@ get_full_page(const string& middle)
 }
 
 bool
-get_monero_network_info(json& j_info)
+get_italo_network_info(json& j_info)
 {
     MempoolStatus::network_info local_copy_network_info
         = MempoolStatus::current_network_info;
@@ -6673,7 +6673,7 @@ get_footer()
             {"last_git_commit_hash", string {GIT_COMMIT_HASH}},
             {"last_git_commit_date", string {GIT_COMMIT_DATETIME}},
             {"git_branch_name"     , string {GIT_BRANCH_NAME}},
-            {"monero_version_full" , string {MONERO_VERSION_FULL}},
+            {"italo_version_full" , string {MONERO_VERSION_FULL}},
             {"api"                 , std::to_string(ONIONEXPLORER_RPC_VERSION_MAJOR)
                                      + "."
                                      + std::to_string(ONIONEXPLORER_RPC_VERSION_MINOR)},
@@ -6744,5 +6744,5 @@ add_js_files(mstch::map& context)
 }
 
 
-#endif //CROWXMR_PAGE_H
+#endif //CROWXTA_PAGE_H
 

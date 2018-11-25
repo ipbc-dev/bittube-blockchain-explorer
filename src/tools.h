@@ -2,12 +2,12 @@
 // Created by mwo on 5/11/15.
 //
 
-#ifndef XMREG01_TOOLS_H
-#define XMREG01_TOOLS_H
+#ifndef XTAEG01_TOOLS_H
+#define XTAEG01_TOOLS_H
 
 #define PATH_SEPARARTOR '/'
 
-#define XMR_AMOUNT(value) \
+#define XTA_AMOUNT(value) \
     static_cast<double>(value) / 1e12
 
 #define REMOVE_HASH_BRAKETS(a_hash) \
@@ -15,7 +15,7 @@
 
 
 
-#include "monero_headers.h"
+#include "italo_headers.h"
 
 #include "../ext/fmt/ostream.h"
 #include "../ext/fmt/format.h"
@@ -281,13 +281,13 @@ xmr_amount_to_str(const uint64_t& xmr_amount,
 
     if (!zero_to_question_mark)
     {
-        amount_str = fmt::format(_format, XMR_AMOUNT(xmr_amount));
+        amount_str = fmt::format(_format, XTA_AMOUNT(xmr_amount));
     }
     else
     {
         if (xmr_amount > 0 && zero_to_question_mark == true)
         {
-            amount_str = fmt::format(_format, XMR_AMOUNT(xmr_amount));
+            amount_str = fmt::format(_format, XTA_AMOUNT(xmr_amount));
         }
     }
 
@@ -375,4 +375,4 @@ tx_to_hex(transaction const& tx);
 
 }
 
-#endif //XMREG01_TOOLS_H
+#endif //XTAEG01_TOOLS_H

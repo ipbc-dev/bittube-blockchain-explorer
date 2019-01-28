@@ -534,7 +534,14 @@
 {{^have_raw_tx}}
     {{^with_ring_signatures}}
         {{#show_more_details_link}}
-            <h5 style="margin-top:1px"><a href="/tx/{{tx_hash}}/1">More details</a></h5>
+            <h5 style="margin-top:1px">
+                <a href="/tx/{{tx_hash}}/1">More details</a>
+                {{#enable_as_hex}}
+                    | <a href="/txhex/{{tx_hash}}">Tx as hex</a>
+                    | <a href="/ringmembershex/{{tx_hash}}">Ring member outputs/mixins as hex</a>
+                    | <a href="/ringmemberstxhex/{{tx_hash}}">Full ring member txs as hex</a>
+                {{/enable_as_hex}}
+            </h5>
         {{/show_more_details_link}}
     {{/with_ring_signatures}}
     {{#with_ring_signatures}}

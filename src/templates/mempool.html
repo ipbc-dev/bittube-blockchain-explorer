@@ -8,10 +8,9 @@
             <tr>
                 <td>age [h:m:s]</td>
                 <td>transaction hash</td>
-                <td>fee/per_kB</td>
+                <td>fee/per_kB [&#181;&#x271]</td>
                 <!--<td>outputs</td>-->
                 <td>in/out/pID</td>
-                <td>ring size</td>
                 <td>tx size [kB]</td>
             </tr>
             {{#mempooltxs}}
@@ -21,7 +20,6 @@
                 <td>{{fee}}/{{payed_for_kB}}</td>
                 <!--<td>{{xmr_outputs}}</td>-->
                 <td>{{no_inputs}}/{{no_outputs}}/{{pID}}</td>
-                <td>{{mixin}}</td>
                 <td>{{txsize}}</td>
             </tr>
             {{/mempooltxs}}

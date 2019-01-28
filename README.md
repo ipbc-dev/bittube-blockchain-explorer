@@ -41,7 +41,7 @@ Download and compile recent BitTube into your home folder:
 # first install BitTube dependecines
 sudo apt update
 
-sudo apt install git build-essential cmake libboost-all-dev miniupnpc libunbound-dev graphviz doxygen libunwind8-dev pkg-config libssl-dev libcurl4-openssl-dev libgtest-dev libreadline-dev libzmq3-dev libsodium-dev libpcsclite-dev
+sudo apt install git build-essential cmake libboost-all-dev miniupnpc libunbound-dev graphviz doxygen libunwind8-dev pkg-config libssl-dev libcurl4-openssl-dev libgtest-dev libreadline-dev libzmq3-dev libsodium-dev libhidapi-dev libhidapi-libusb0
 
 # go to home folder
 cd ~
@@ -50,7 +50,7 @@ git clone --recursive https://github.com/ipbc-dev/bittube-coin.git bittube
 
 cd bittube/
 
-make
+USE_SINGLE_BUILDDIR=1 make
 ```
 
 ##### Compile and run the explorer
@@ -635,7 +635,6 @@ curl  -w "\n" -X GET http://127.0.0.1:8081/api/outputsblocks?address=9sDyNU82ih1
 Example result:
 
 ```json
-{
 {
   "data": {
     "address": "0182d5be0f708cecf2b6f9889738bde5c930fad846d5b530e021afd1ae7e24a687ad50af3a5d38896655669079ad0163b4a369f6c852cc816dace5fc7792b72f",

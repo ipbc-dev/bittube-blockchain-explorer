@@ -943,10 +943,12 @@ index2(uint64_t page_no = 0, bool refresh_page = false)
     {
         current_network_info.current = true;
     }
+    std::string fee_type = height >= 268000 ? "byte" : "kb";
 
     context["network_info"] = mstch::map {
             {"difficulty"        , current_network_info.difficulty},
             {"hash_rate"         , hash_rate},
+            {"fee_type"          , fee_type},
             {"fee_per_kb"        , print_money(current_network_info.fee_per_kb)},
             {"alt_blocks_no"     , current_network_info.alt_blocks_count},
             {"have_alt_block"    , (current_network_info.alt_blocks_count > 0)},

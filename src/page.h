@@ -407,8 +407,6 @@ string js_html_files_all_in_one;
 // read operation in OS
 map<string, string> template_file;
 
-    map<string, string> static_file;
-
 
 // alias for easy class typing
 template <typename Key, typename Value>
@@ -505,6 +503,11 @@ page(MicroCore* _mcore,
     template_file["tx_table_header"] = xmreg::read(string(TMPL_PARIALS_DIR) + "/tx_table_header.html");
     template_file["tx_table_row"]    = xmreg::read(string(TMPL_PARIALS_DIR) + "/tx_table_row.html");
 
+    template_file["airtime_html"] = xmreg::read(TMPL_AIR_HTML);
+    template_file["style.css"] = xmreg::read(TMPL_CSS_STYLE);
+    template_file["roboto_font.css"] = xmreg::read(TMPL_CSS_ROBOTO_FONT);
+    template_file["airtime.js"] = xmreg::read(TMPL_JS_AIRTIME);
+
     if (enable_js) {
         // JavaScript files
         template_file["jquery.min.js"]   = xmreg::read(JS_JQUERY);
@@ -568,25 +571,25 @@ page(MicroCore* _mcore,
 string
 airtime()
 {
-    return static_file["airtime_html"];
+    return template_file["airtime_html"];
 }
 
 string
 css_style()
 {
-    return static_file["style.css"];
+    return template_file["style.css"];
 }
 
 string
 css_roboto_font()
 {
-    return static_file["roboto_font.css"];
+    return template_file["roboto_font.css"];
 }
 
 string
 js_airtime()
 {
-    return static_file["airtime.js"];
+    return template_file["airtime.js"];
 }
 
 /**

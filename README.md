@@ -46,12 +46,11 @@ sudo apt install git build-essential cmake libboost-all-dev miniupnpc libunbound
 # go to home folder
 cd ~
 
-git clone --recursive https://github.com/ipbc-dev/bittube-coin.git bittube
+git clone --recursive https://github.com/ipbc-dev/bittube.git bittube
 
 cd bittube/
 
-USE_SINGLE_BUILDDIR=1 make
-```
+https://github.com/moneroexamples/monero-compilation/blob/master/README.md
 
 ##### Compile and run the explorer
 

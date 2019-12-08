@@ -10,6 +10,12 @@
 #include "mstch/mstch.hpp"
 
 #include "italo_headers.h"
+#include "randomx.h"
+#include "common.hpp"
+#include "blake2/blake2.h"
+#include "virtual_machine.hpp"
+#include "program.hpp"
+#include "aes_hash.hpp"
 
 #include "../gen/version.h"
 
@@ -29,7 +35,12 @@
 #include "../ext/vpetrigocaches/fifo_cache_policy.hpp"
 #include "../ext/mstch/src/visitor/render_node.hpp"
 
+extern "C" bool rx_needhash(const uint64_t height, uint64_t *seedheight);
+extern "C" void rx_seedhash(const uint64_t seedheight, const char *hash, const int miners);
+extern "C" void rx_slow_hash(const void *data, size_t length, char *hash, const int miners);
+extern "C" void rx_reorg(const uint64_t split_height);
 
+extern __thread randomx_vm *rx_vm;
 
 #include <algorithm>
 #include <limits>
@@ -49,6 +60,7 @@
 #define TMPL_HEADER                 TMPL_DIR "/header.html"
 #define TMPL_FOOTER                 TMPL_DIR "/footer.html"
 #define TMPL_BLOCK                  TMPL_DIR "/block.html"
+#define TMPL_RANDOMX                TMPL_DIR "/randomx.html"
 #define TMPL_TX                     TMPL_DIR "/tx.html"
 #define TMPL_ADDRESS                TMPL_DIR "/address.html"
 #define TMPL_MY_OUTPUTS             TMPL_DIR "/my_outputs.html"
@@ -60,16 +72,6 @@
 #define TMPL_MY_CHECKRAWKEYIMGS     TMPL_DIR "/checkrawkeyimgs.html"
 #define TMPL_MY_RAWOUTPUTKEYS       TMPL_DIR "/rawoutputkeys.html"
 #define TMPL_MY_CHECKRAWOUTPUTKEYS  TMPL_DIR "/checkrawoutputkeys.html"
-
-#define JS_JQUERY   TMPL_DIR "/js/jquery.min.js"
-#define JS_CRC32    TMPL_DIR "/js/crc32.js"
-#define JS_BIGINT   TMPL_DIR "/js/biginteger.js"
-#define JS_CONFIG   TMPL_DIR "/js/config.js"
-#define JS_BASE58   TMPL_DIR "/js/base58.js"
-#define JS_CRYPTO   TMPL_DIR "/js/crypto.js"
-#define JS_CNUTIL   TMPL_DIR "/js/cn_util.js"
-#define JS_NACLFAST TMPL_DIR "/js/nacl-fast-cn.js"
-#define JS_SHA3     TMPL_DIR "/js/sha3.js"
 
 #define ONIONEXPLORER_RPC_VERSION_MAJOR 1
 #define ONIONEXPLORER_RPC_VERSION_MINOR 1
@@ -403,7 +405,6 @@ bool mainnet;
 bool testnet;
 bool stagenet;
 
-bool enable_js;
 
 bool enable_pusher;
 
@@ -462,7 +463,6 @@ page(MicroCore* _mcore,
      string _deamon_url,
      cryptonote::network_type _nettype,
      bool _enable_pusher,
-     bool _enable_js,
      bool _enable_as_hex,
      bool _enable_key_image_checker,
      bool _enable_output_key_checker,
@@ -482,7 +482,6 @@ page(MicroCore* _mcore,
           server_timestamp {std::time(nullptr)},
           nettype {_nettype},
           enable_pusher {_enable_pusher},
-          enable_js {_enable_js},
           enable_as_hex {_enable_as_hex},
           enable_key_image_checker {_enable_key_image_checker},
           enable_output_key_checker {_enable_output_key_checker},
@@ -517,6 +516,7 @@ page(MicroCore* _mcore,
     template_file["mempool_error"]   = xmreg::read(TMPL_MEMPOOL_ERROR);
     template_file["mempool_full"]    = get_full_page(template_file["mempool"]);
     template_file["block"]           = get_full_page(xmreg::read(TMPL_BLOCK));
+    template_file["randomx"]         = get_full_page(xmreg::read(TMPL_RANDOMX));
     template_file["tx"]              = get_full_page(xmreg::read(TMPL_TX));
     template_file["my_outputs"]      = get_full_page(xmreg::read(TMPL_MY_OUTPUTS));
     template_file["rawtx"]           = get_full_page(xmreg::read(TMPL_MY_RAWTX));
@@ -531,65 +531,6 @@ page(MicroCore* _mcore,
     template_file["tx_details"]      = xmreg::read(string(TMPL_PARIALS_DIR) + "/tx_details.html");
     template_file["tx_table_header"] = xmreg::read(string(TMPL_PARIALS_DIR) + "/tx_table_header.html");
     template_file["tx_table_row"]    = xmreg::read(string(TMPL_PARIALS_DIR) + "/tx_table_row.html");
-
-    if (enable_js) {
-        // JavaScript files
-        template_file["jquery.min.js"]   = xmreg::read(JS_JQUERY);
-        template_file["crc32.js"]        = xmreg::read(JS_CRC32);
-        template_file["crypto.js"]       = xmreg::read(JS_CRYPTO);
-        template_file["cn_util.js"]      = xmreg::read(JS_CNUTIL);
-        template_file["base58.js"]       = xmreg::read(JS_BASE58);
-        template_file["nacl-fast-cn.js"] = xmreg::read(JS_NACLFAST);
-        template_file["sha3.js"]         = xmreg::read(JS_SHA3);
-        template_file["config.js"]       = xmreg::read(JS_CONFIG);
-        template_file["biginteger.js"]   = xmreg::read(JS_BIGINT);
-
-        // need to set  "testnet: false," flag to reflect
-        // if we are running testnet or mainnet explorer
-
-        if (testnet)
-        {
-            template_file["config.js"] = std::regex_replace(
-                    template_file["config.js"],
-                    std::regex("testnet: false"),
-                    "testnet: true");
-        }
-
-        // the same idea as above for the stagenet
-
-        if (stagenet)
-        {
-            template_file["config.js"] = std::regex_replace(
-                    template_file["config.js"],
-                    std::regex("stagenet: false"),
-                    "stagenet: true");
-        }
-
-        template_file["all_in_one.js"] = template_file["jquery.min.js"] +
-                                         template_file["crc32.js"] +
-                                         template_file["biginteger.js"] +
-                                         template_file["config.js"] +
-                                         template_file["nacl-fast-cn.js"] +
-                                         template_file["crypto.js"] +
-                                         template_file["base58.js"] +
-                                         template_file["cn_util.js"] +
-                                         template_file["sha3.js"];
-
-        js_html_files += "<script src=\"/js/jquery.min.js\"></script>";
-        js_html_files += "<script src=\"/js/crc32.js\"></script>";
-        js_html_files += "<script src=\"/js/biginteger.js\"></script>";
-        js_html_files += "<script src=\"/js/config.js\"></script>";
-        js_html_files += "<script src=\"/js/nacl-fast-cn.js\"></script>";
-        js_html_files += "<script src=\"/js/crypto.js\"></script>";
-        js_html_files += "<script src=\"/js/base58.js\"></script>";
-        js_html_files += "<script src=\"/js/cn_util.js\"></script>";
-        js_html_files += "<script src=\"/js/sha3.js\"></script>";
-
-        // /js/all_in_one.js file does not exist. it is generated on the fly
-        // from the above real files.
-        js_html_files_all_in_one = "<script src=\"/js/all_in_one.js\"></script>";
-    }
-
 }
 
 /**
@@ -1205,7 +1146,6 @@ altblocks()
 string
 show_block(uint64_t _blk_height)
 {
-
     // get block at the given height i
     block blk;
 
@@ -1290,8 +1230,64 @@ show_block(uint64_t _blk_height)
 
     // initalise page tempate map with basic info about blockchain
 
-    string blk_pow_hash_str = pod_to_hex(get_block_longhash(blk, _blk_height));
-    uint64_t blk_difficulty = core_storage->get_db().get_block_difficulty(_blk_height);
+    string blk_pow_hash_str = pod_to_hex(get_block_longhash(
+                core_storage, blk, _blk_height, 0));
+
+    cryptonote::difficulty_type blk_difficulty 
+        = core_storage->get_db().get_block_difficulty(_blk_height);
+
+
+    uint64_t seed_height;
+
+    rx_needhash(_blk_height, &seed_height);
+    cout << "seed_height: " << seed_height << '\n';
+
+    rx_seedhash(seed_height, blk_hash.data, 0);
+
+    blobdata bd = get_block_hashing_blob(blk);
+
+    crypto::hash res;
+    
+    //cout << pod_to_hex(blk_hash) << endl;
+
+    rx_slow_hash(bd.data(), bd.size(), res.data, 0);
+
+    cout << "pow: " << pod_to_hex(res) << endl;
+
+    cout << bool {rx_vm} << endl;
+
+
+
+    // based on randomx calculate hash
+    // the hash is seed used to generated scrachtpad and program
+    alignas(16) uint64_t tempHash[8];
+    blake2b(tempHash, sizeof(tempHash), bd.data(), bd.size(), nullptr, 0); 
+
+    rx_vm->initScratchpad(&tempHash);
+    rx_vm->resetRoundingMode();
+
+    for (int chain = 0; chain < RANDOMX_PROGRAM_COUNT - 1; ++chain) {
+        rx_vm->run(&tempHash);
+        blake2b(tempHash, sizeof(tempHash), 
+                rx_vm->getRegisterFile(), 
+                sizeof(randomx::RegisterFile), nullptr, 0); 
+    }   
+   rx_vm->run(&tempHash);
+
+    crypto::hash res2;
+    rx_vm->getFinalResult(res2.data, RANDOMX_HASH_SIZE);
+    
+    cout << "pow2: " << pod_to_hex(res2) << endl;
+    
+   std::cout << "\nddddd\n\n";  
+    std::cout << rx_vm->getProgram();
+
+    randomx::Program* prg 
+        = reinterpret_cast<randomx::Program*>(
+                reinterpret_cast<char*>(rx_vm) + 64);
+
+   std::cout << "\nddddd\n\n";  
+    cout << *prg << endl;
 
     mstch::map context {
             {"testnet"              , testnet},
@@ -1312,7 +1308,9 @@ show_block(uint64_t _blk_height)
             {"delta_time"           , delta_time},
             {"blk_nonce"            , blk.nonce},
             {"blk_pow_hash"         , blk_pow_hash_str},
-            {"blk_difficulty"       , blk_difficulty},
+            {"is_randomx"           , (blk.major_version >= 13)},
+            {"blk_difficulty_lo"    , blk_difficulty},
+            {"blk_difficulty_hi"    , blk_difficulty},
             {"age_format"           , age.second},
             {"major_ver"            , std::to_string(blk.major_version)},
             {"minor_ver"            , std::to_string(blk.minor_version)},
@@ -1410,6 +1408,66 @@ show_block(string _blk_hash)
 
     return show_block(blk_height);
 }
+
+string
+show_randomx(uint64_t _blk_height)
+{
+    // get block at the given height i
+    block blk;
+
+    uint64_t current_blockchain_height
+            =  core_storage->get_current_blockchain_height();
+
+    if (_blk_height > current_blockchain_height)
+    {
+        cerr << "Cant get block: " << _blk_height
+             << " since its higher than current blockchain height"
+             << " i.e., " <<  current_blockchain_height
+             << endl;
+        return fmt::format("Cant get block {:d} since its higher than current blockchain height!",
+                           _blk_height);
+    }
+
+    if (!mcore->get_block_by_height(_blk_height, blk))
+    {
+        cerr << "Cant get block: " << _blk_height << endl;
+        return fmt::format("Cant get block {:d}!", _blk_height);
+    }
+
+    // get block's hash
+    crypto::hash blk_hash = core_storage->get_block_id_by_height(_blk_height);
+    
+    string blk_hash_str  = pod_to_hex(blk_hash);
+
+
+    vector<string> rx_code = get_randomx_code(_blk_height,
+                                    blk, blk_hash);
+
+    mstch::array rx_code_str = mstch::array{};
+    int code_idx {1};
+
+    for (auto& rxc: rx_code)
+    {
+        rx_code_str.push_back(
+           mstch::map {
+              {"rx_code_idx", code_idx++},
+              {"rx_code", std::move(rxc)}
+        });
+    }
+
+    mstch::map context {
+            {"testnet"              , testnet},
+            {"stagenet"             , stagenet},
+            {"blk_hash"             , blk_hash_str},
+            {"blk_height"           , _blk_height},
+            {"rx_codes"             , rx_code_str},
+    };
+    
+    add_css_style(context);
+
+    return mstch::render(template_file["randomx"], context);
+}
+
 
 string
 show_tx(string tx_hash_str, uint16_t with_ring_signatures = 0)
@@ -1637,9 +1695,6 @@ show_tx(string tx_hash_str, uint16_t with_ring_signatures = 0)
     };
 
     add_css_style(context);
-
-    if (enable_js)
-        add_js_files(context);
 
     // render the page
     return mstch::render(template_file["tx"], context, partials);
@@ -2331,8 +2386,8 @@ show_my_outputs(string tx_hash_str,
     string pid_str   = pod_to_hex(txd.payment_id);
     string pid8_str  = pod_to_hex(txd.payment_id8);
 
-    string shortcut_url = domain
-                          + (tx_prove ? "/prove" : "/myoutputs")
+    string shortcut_url = tx_prove 
+                    ? string("/prove") : string("/myoutputs")
                           + '/' + tx_hash_str
                           + '/' + xmr_address_str
                           + '/' + viewkey_str;
@@ -2366,6 +2421,7 @@ show_my_outputs(string tx_hash_str,
             {"payment_id8"          , pid8_str},
             {"decrypted_payment_id8", string{}},
             {"tx_prove"             , tx_prove},
+            {"domain_url"           , domain},
             {"shortcut_url"         , shortcut_url}
     };
 
@@ -3022,8 +3078,6 @@ show_checkrawtx(string raw_tx_data, string action)
 
     add_css_style(context);
 
-    if (enable_js)
-        add_js_files(context);
 
     if (unsigned_tx_given)
     {
@@ -3370,8 +3424,6 @@ show_checkrawtx(string raw_tx_data, string action)
 
             add_css_style(context);
 
-            if (enable_js)
-                add_js_files(context);
 
             // render the page
             return mstch::render(template_file["checkrawtx"], context, partials);
@@ -7086,8 +7138,6 @@ void
 add_css_style(mstch::map& context)
 {
     // add_css_style goes to every subpage so here we mark
-    // if js is anabled or not.
-    context["enable_js"] = enable_js;
 
     context["css_styles"] = mstch::lambda{[&](const std::string& text) -> mstch::node {
         return template_file["css_styles"];
@@ -7129,13 +7179,70 @@ get_tx(string const& tx_hash_str,
     return true;
 }
 
-void
-add_js_files(mstch::map& context)
+vector<string>
+get_randomx_code(uint64_t blk_height, 
+                 block const& blk,
+                 crypto::hash const& blk_hash)
 {
-    context["js_files"] = mstch::lambda{[&](const std::string& text) -> mstch::node {
-        //return this->js_html_files;
-        return this->js_html_files_all_in_one;
-    }};
+    vector<string> rx_code;
+
+    uint64_t seed_height;
+
+    rx_needhash(blk_height, &seed_height);
+
+    //cout << "seed_height: " << seed_height << '\n';
+
+    rx_seedhash(seed_height, blk_hash.data, 0);
+
+    blobdata bd = get_block_hashing_blob(blk);
+
+    crypto::hash res;
+    
+    //cout << pod_to_hex(blk_hash) << endl;
+
+    //rx_slow_hash(bd.data(), bd.size(), res.data, 0);
+
+    //cout << "pow: " << pod_to_hex(res) << endl;
+
+    //cout << bool {rx_vm} << endl;
+    //
+    if (!rx_vm)
+    {
+        cerr << "rx_vm is null\n";
+        return rx_code;
+    }
+
+    // based on randomx calculate hash
+    // the hash is seed used to generated scrachtpad and program
+    alignas(16) uint64_t tempHash[8];
+    blake2b(tempHash, sizeof(tempHash), bd.data(), bd.size(), nullptr, 0); 
+
+    rx_vm->initScratchpad(&tempHash);
+    rx_vm->resetRoundingMode();
+
+    for (int chain = 0; chain < RANDOMX_PROGRAM_COUNT - 1; ++chain) 
+    {
+        rx_vm->run(&tempHash);
+        blake2b(tempHash, sizeof(tempHash), 
+                rx_vm->getRegisterFile(), 
+                sizeof(randomx::RegisterFile), nullptr, 0); 
+
+        stringstream ss;
+        ss << rx_vm->getProgram();
+        rx_code.push_back(ss.str());
+    }   
+
+    rx_vm->run(&tempHash);
+    stringstream ss;
+    ss << rx_vm->getProgram();
+    rx_code.push_back(ss.str());
+
+    crypto::hash res2;
+    rx_vm->getFinalResult(res2.data, RANDOMX_HASH_SIZE);
+    
+    cout << "pow2: " << pod_to_hex(res2) << endl;
+
+    return rx_code;
 }
 
 template <typename T, typename... Args>

@@ -43,8 +43,6 @@ namespace xmreg
                  "show times of getting data from cache vs no cache")
                 ("enable-block-cache", value<bool>()->default_value(false)->implicit_value(true),
                  "enable caching of block details")
-                ("enable-js", value<bool>()->default_value(false)->implicit_value(true),
-                 "enable checking outputs and proving txs using JavaScript on client side")
                 ("enable-as-hex", value<bool>()->default_value(false)->implicit_value(true),
                  "enable links to provide hex represtations of a tx and a block")
                 ("enable-autorefresh-option", value<bool>()->default_value(false)->implicit_value(true),
@@ -67,6 +65,8 @@ namespace xmreg
                  "maximum time, in milliseconds, to wait for mempool data for the front page")
                 ("mempool-refresh-time", value<string>()->default_value("5"),
                  "time, in seconds, for each refresh of mempool state")
+                ("concurrency,c", value<size_t>()->default_value(0),
+                 "number of threads handling http queries. Default is 0 which means it is based you on the cpu")
                 ("bc-path,b", value<string>(),
                  "path to lmdb folder of the blockchain, e.g., ~/.italo/lmdb")
                 ("ssl-crt-file", value<string>(),

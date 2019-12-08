@@ -22,15 +22,20 @@
 
 #include "../ext/crow/crow.h"
 
+#include "../ext/json.hpp"
+
 #include "../ext/vpetrigocaches/cache.hpp"
 #include "../ext/vpetrigocaches/lru_cache_policy.hpp"
 #include "../ext/vpetrigocaches/fifo_cache_policy.hpp"
+#include "../ext/mstch/src/visitor/render_node.hpp"
+
+
 
 #include <algorithm>
 #include <limits>
 #include <ctime>
 #include <future>
-#include <visitor/render_node.hpp>
+#include <type_traits>
 
 
 #define TMPL_DIR                    "./templates"
@@ -97,6 +102,43 @@ struct tx_info_cache
         }
     };
 };
+
+
+// helper to ignore any number of template parametrs
+template<typename...> using VoidT = void;
+
+// primary template;
+template<typename, typename = VoidT<>>
+struct HasSpanInGetOutputKeyT: std::false_type
+{};
+
+//partial specialization (myy be SFINAEed away)
+template <typename T>
+struct HasSpanInGetOutputKeyT<
+    T, 
+    VoidT<decltype(std::declval<T>()
+            .get_output_key(
+                std::declval<const epee::span<const uint64_t>&>(),
+                std::declval<const std::vector<uint64_t>&>(),
+                std::declval<std::vector<cryptonote::output_data_t>&>()))
+    >>: std::true_type
+{};
+
+
+// primary template;
+template<typename, typename = VoidT<>>
+struct OutputIndicesReturnVectOfVectT : std::false_type 
+{};
+
+template<typename T>
+struct OutputIndicesReturnVectOfVectT<
+    T,
+    VoidT<decltype(std::declval<T>()
+            .get_tx_amount_output_indices(
+                uint64_t{}, size_t{})
+            .front().front())
+    >>: std::true_type 
+{};
 
 // indect overload of hash for tx_info_cache::key
 namespace std
@@ -189,8 +231,6 @@ using namespace std;
 
 using epee::string_tools::pod_to_hex;
 using epee::string_tools::hex_to_pod;
-
-
 
 /**
 * @brief The tx_details struct
@@ -462,7 +502,6 @@ page(MicroCore* _mcore,
     mainnet = nettype == cryptonote::network_type::MAINNET;
     testnet = nettype == cryptonote::network_type::TESTNET;
     stagenet = nettype == cryptonote::network_type::STAGENET;
-
 
     no_of_mempool_tx_of_frontpage = 25;
 
@@ -1717,9 +1756,12 @@ show_ringmembers_hex(string const& tx_hash_str)
                     == false)
                 continue;
 
-            core_storage->get_db().get_output_key(in_key.amount,
-                                                  absolute_offsets,
-                                                  mixin_outputs);
+            //core_storage->get_db().get_output_key(in_key.amount,
+            //                                      absolute_offsets,
+            //                                      mixin_outputs);
+            get_output_key<BlockchainDB>(in_key.amount,
+                                         absolute_offsets,
+                                         mixin_outputs);
         }
         catch (OUTPUT_DNE const& e)
         {
@@ -1747,10 +1789,347 @@ show_ringmembers_hex(string const& tx_hash_str)
     // return as all_mixin_outputs vector hex
     return epee::string_tools
             ::buff_to_hex_nodelimer(oss.str());
-
 }
 
+string
+show_ringmemberstx_hex(string const& tx_hash_str)
+{
+    transaction tx;
+    crypto::hash tx_hash;
 
+    if (!get_tx(tx_hash_str, tx, tx_hash))
+        return string {"Cant get tx: "} +  tx_hash_str;
+
+    vector<txin_to_key> input_key_imgs = xmreg::get_key_images(tx);
+
+    // key: constracted from concatenation of in_key.amount and absolute_offsets,
+    // value: vector of string where string is transaction hash + output index + tx_hex
+    // will have to cut this string when de-seraializing this data
+    // later in the unit tests
+    // transaction hash and output index represent tx_out_index
+    std::map<string, vector<string>> all_mixin_txs;
+
+    for (txin_to_key const& in_key: input_key_imgs)
+    {
+        // get absolute offsets of mixins
+        std::vector<uint64_t> absolute_offsets
+                = cryptonote::relative_output_offsets_to_absolute(
+                        in_key.key_offsets);
+
+        //tx_out_index is pair::<transaction hash, output index>
+        vector<tx_out_index> indices;
+
+        // get tx hashes and indices in the txs for the
+        // given outputs of mixins
+        //  this cant THROW DB_EXCEPTION
+        try
+        {
+            // get tx of the real output
+            core_storage->get_db().get_output_tx_and_index(
+                        in_key.amount, absolute_offsets, indices);
+        }
+        catch (exception const& e)
+        {
+
+            string out_msg = fmt::format(
+                    "Cant get ring member tx_out_index for tx {:s}", tx_hash_str
+            );
+
+            cerr << out_msg << endl;
+
+            return string(out_msg);
+        }
+
+        string map_key = std::to_string(in_key.amount);
+
+        for (auto const& ao: absolute_offsets)
+            map_key += std::to_string(ao);
+
+        // serialize each mixin tx
+        for (auto const& txi : indices)
+        {
+           auto const& mixin_tx_hash = txi.first;
+           auto const& output_index_in_tx = txi.second;
+
+           transaction mixin_tx;
+
+           if (!mcore->get_tx(mixin_tx_hash, mixin_tx))
+           {
+               throw std::runtime_error("Cant get tx: "
+                                        + pod_to_hex(mixin_tx_hash));
+           }
+
+           // serialize tx
+           string tx_hex = epee::string_tools::buff_to_hex_nodelimer(
+                                   t_serializable_object_to_blob(mixin_tx));
+
+           all_mixin_txs[map_key].push_back(
+                       pod_to_hex(mixin_tx_hash)
+                       + std::to_string(output_index_in_tx)
+                       + tx_hex);
+        }
+
+    } // for (txin_to_key const& in_key: input_key_imgs)
+
+    if (all_mixin_txs.empty())
+        return string {"No ring members to serialize"};
+
+    // archive all_mixin_outputs vector
+    std::ostringstream oss;
+    boost::archive::portable_binary_oarchive archive(oss);
+    archive << all_mixin_txs;
+
+    // return as all_mixin_outputs vector hex
+    return epee::string_tools
+            ::buff_to_hex_nodelimer(oss.str());
+}
+
+/**
+ * @brief Get ring member tx data
+ *
+ * Used for generating json file of txs used in unit testing.
+ * Thanks to json output from this function, we can mock
+ * a number of blockchain quries about key images
+ *
+ * @param tx_hash_str
+ * @return
+ */
+json
+show_ringmemberstx_jsonhex(string const& tx_hash_str)
+{
+    transaction tx;
+    crypto::hash tx_hash;
+
+    if (!get_tx(tx_hash_str, tx, tx_hash))
+        return string {"Cant get tx: "} +  tx_hash_str;
+
+    vector<txin_to_key> input_key_imgs = xmreg::get_key_images(tx);
+
+    json tx_json;
+
+    string tx_hex;
+
+    try
+    {
+        tx_hex = tx_to_hex(tx);
+    }
+    catch (std::exception const& e)
+    {
+        cerr << e.what() << endl;
+        return json {"error", "Failed to obtain hex of tx"};
+    }
+
+    tx_json["hash"] = tx_hash_str;
+    tx_json["hex"]  = tx_hex;
+    tx_json["nettype"] = static_cast<size_t>(nettype);
+    tx_json["is_ringct"] = (tx.version > 1);
+    tx_json["rct_type"] = tx.rct_signatures.type;
+
+    tx_json["_comment"] = "Just a placeholder for some comment if needed later";
+
+    // add placeholder for sender and recipient details
+    // this is most useful for unit testing on stagenet/testnet
+    // private monero networks, so we can easly put these
+    // networks accounts details here.
+    tx_json["sender"] = json {
+                            {"seed", ""},
+                            {"address", ""},
+                            {"viewkey", ""},
+                            {"spendkey", ""},
+                            {"amount", 0ull},
+                            {"change", 0ull},
+                            {"outputs", json::array({json::array(
+                                            {"index placeholder",
+                                             "public_key placeholder",
+                                             "amount placeholder"}
+                                        )})
+                            },
+                            {"_comment", ""}};
+
+    tx_json["recipient"] = json::array();
+
+
+    tx_json["recipient"].push_back(
+                            json { {"seed", ""},
+                                {"address", ""},
+                                {"is_subaddress", false},
+                                {"viewkey", ""},
+                                {"spendkey", ""},
+                                {"amount", 0ull},
+                                {"outputs", json::array({json::array(
+                                               {"index placeholder",
+                                                "public_key placeholder",
+                                                "amount placeholder"}
+                                           )})
+                                },
+                                {"_comment", ""}});
+
+
+    uint64_t tx_blk_height {0};
+
+    try
+    {
+        tx_blk_height = core_storage->get_db().get_tx_block_height(tx_hash);
+    }
+    catch (exception& e)
+    {
+        cerr << "Cant get block height: " << tx_hash
+             << e.what() << endl;
+
+        return json {"error", "Cant get block height"};
+    }
+
+    // get block cointaining this tx
+    block blk;
+
+    if ( !mcore->get_block_by_height(tx_blk_height, blk))
+    {
+        cerr << "Cant get block: " << tx_blk_height << endl;
+        return json {"error", "Cant get block"};
+    }
+
+    block_complete_entry complete_block_data;
+
+    if (!mcore->get_block_complete_entry(blk, complete_block_data))
+    {
+        cerr << "Failed to obtain complete block data " << endl;
+        return json {"error", "Failed to obtain complete block data "};
+    }
+
+    std::string complete_block_data_str;
+
+    if(!epee::serialization::store_t_to_binary(
+                complete_block_data, complete_block_data_str))
+    {
+        cerr << "Failed to serialize complete_block_data\n";
+        return json {"error", "Failed to obtain complete block data"};
+    }
+
+    tx_details txd = get_tx_details(tx);
+
+    tx_json["payment_id"] = pod_to_hex(txd.payment_id);
+    tx_json["payment_id8"] = pod_to_hex(txd.payment_id8);
+    tx_json["payment_id8e"] = pod_to_hex(txd.payment_id8);
+
+    tx_json["block"] = epee::string_tools
+             ::buff_to_hex_nodelimer(complete_block_data_str);
+
+    tx_json["block_version"] = json {blk.major_version, blk.minor_version};
+
+    tx_json["inputs"] = json::array();
+
+
+    // key: constracted from concatenation of in_key.amount and absolute_offsets,
+    // value: vector of string where string is transaction hash + output index + tx_hex
+    // will have to cut this string when de-seraializing this data
+    // later in the unit tests
+    // transaction hash and output index represent tx_out_index
+    std::map<string, vector<string>> all_mixin_txs;
+
+    for (txin_to_key const& in_key: input_key_imgs)
+    {
+        // get absolute offsets of mixins
+        std::vector<uint64_t> absolute_offsets
+                = cryptonote::relative_output_offsets_to_absolute(
+                        in_key.key_offsets);
+
+        //tx_out_index is pair::<transaction hash, output index>
+        vector<tx_out_index> indices;
+        std::vector<output_data_t> mixin_outputs;
+
+        // get tx hashes and indices in the txs for the
+        // given outputs of mixins
+        //  this cant THROW DB_EXCEPTION
+        try
+        {
+            // get tx of the real output
+            core_storage->get_db().get_output_tx_and_index(
+                        in_key.amount, absolute_offsets, indices);
+
+            // get mining ouput info
+            //core_storage->get_db().get_output_key(
+                        //in_key.amount,
+                        //absolute_offsets,
+                        //mixin_outputs);
+
+            get_output_key<BlockchainDB>(in_key.amount,
+                                           absolute_offsets,
+                                           mixin_outputs);
+        }
+        catch (exception const& e)
+        {
+
+            string out_msg = fmt::format(
+                    "Cant get ring member tx_out_index for tx {:s}", tx_hash_str
+            );
+
+            cerr << out_msg << endl;
+
+            return json {"error", out_msg};
+        }
+
+
+        tx_json["inputs"].push_back(json {{"key_image", pod_to_hex(in_key.k_image)},
+                                          {"amount", in_key.amount},
+                                          {"absolute_offsets", absolute_offsets},
+                                          {"ring_members", json::array()}});
+
+        json& ring_members = tx_json["inputs"].back()["ring_members"];
+
+
+        if (indices.size() != mixin_outputs.size())
+        {
+            cerr << "indices.size() != mixin_outputs.size()\n";
+            return json {"error", "indices.size() != mixin_outputs.size()"};
+        }
+
+        // serialize each mixin tx
+        //for (auto const& txi : indices)
+        for (size_t i = 0; i < indices.size(); ++i)
+        {
+
+           tx_out_index const& txi = indices[i];
+           output_data_t const& mo = mixin_outputs[i];
+
+           auto const& mixin_tx_hash = txi.first;
+           auto const& output_index_in_tx = txi.second;
+
+           transaction mixin_tx;
+
+           if (!mcore->get_tx(mixin_tx_hash, mixin_tx))
+           {
+               throw std::runtime_error("Cant get tx: "
+                                        + pod_to_hex(mixin_tx_hash));
+           }
+
+           // serialize tx
+           string tx_hex = epee::string_tools::buff_to_hex_nodelimer(
+                                   t_serializable_object_to_blob(mixin_tx));
+
+           ring_members.push_back(
+                   json {
+                          {"ouput_pk", pod_to_hex(mo.pubkey)},
+                          {"tx_hash", pod_to_hex(mixin_tx_hash)},
+                          {"output_index_in_tx", txi.second},
+                          {"tx_hex", tx_hex},
+                   });
+
+        }
+
+    } // for (txin_to_key const& in_key: input_key_imgs)
+
+
+    // archive all_mixin_outputs vector
+    std::ostringstream oss;
+    boost::archive::portable_binary_oarchive archive(oss);
+    archive << all_mixin_txs;
+
+    // return as all_mixin_outputs vector hex
+    //return epee::string_tools
+    //        ::buff_to_hex_nodelimer(oss.str());
+
+    return tx_json;
+}
 
 string
 show_my_outputs(string tx_hash_str,
@@ -2070,8 +2449,11 @@ show_my_outputs(string tx_hash_str,
                           address_info.address.m_spend_public_key,
                           tx_pubkey);
 
-        //cout << pod_to_hex(outp.first.key) << endl;
-        //cout << pod_to_hex(tx_pubkey) << endl;
+//        cout << pod_to_hex(derivation) << ", " << output_idx << ", "
+//             << pod_to_hex(address_info.address.m_spend_public_key) << ", "
+//             << pod_to_hex(outp.first.key) << " == "
+//             << pod_to_hex(tx_pubkey) << '\n'  << '\n';
+
 
         // check if generated public key matches the current output's key
         bool mine_output = (outp.first.key == tx_pubkey);
@@ -2085,6 +2467,7 @@ show_my_outputs(string tx_hash_str,
                               output_idx,
                               address_info.address.m_spend_public_key,
                               tx_pubkey);
+
 
             mine_output = (outp.first.key == tx_pubkey);
 
@@ -2184,9 +2567,13 @@ show_my_outputs(string tx_hash_str,
             if (are_absolute_offsets_good(absolute_offsets, in_key) == false)
                 continue;
 
-            core_storage->get_db().get_output_key(in_key.amount,
-                                                  absolute_offsets,
-                                                  mixin_outputs);
+            //core_storage->get_db().get_output_key(in_key.amount,
+                                                  //absolute_offsets,
+                                                  //mixin_outputs);
+            
+            get_output_key<BlockchainDB>(in_key.amount,
+                                           absolute_offsets,
+                                           mixin_outputs);
         }
         catch (const OUTPUT_DNE& e)
         {
@@ -4347,9 +4734,13 @@ json_transaction(string tx_hash_str)
             if (are_absolute_offsets_good(absolute_offsets, in_key) == false)
                 continue;
 
-            core_storage->get_db().get_output_key(in_key.amount,
-                                                  absolute_offsets,
-                                                  outputs);
+            //core_storage->get_db().get_output_key(in_key.amount,
+                                                  //absolute_offsets,
+                                                  //outputs);
+
+            get_output_key<BlockchainDB>(in_key.amount,
+                                           absolute_offsets,
+                                           outputs);
         }
         catch (const OUTPUT_DNE &e)
         {
@@ -4550,7 +4941,7 @@ json_block(string block_no_or_hash)
             {"data"  , json {}}
     };
 
-    json& j_data = j_response["data"];
+    nlohmann::json& j_data = j_response["data"];
 
     uint64_t current_blockchain_height
             =  core_storage->get_current_blockchain_height();
@@ -6023,9 +6414,13 @@ construct_tx_context(transaction tx, uint16_t with_ring_signatures = 0)
 
             // offsets seems good, so try to get the outputs for the amount and
             // offsets given
-            core_storage->get_db().get_output_key(in_key.amount,
-                                                  absolute_offsets,
-                                                  outputs);
+            //core_storage->get_db().get_output_key(in_key.amount,
+                                                  //absolute_offsets,
+                                                  //outputs);
+            
+            get_output_key<BlockchainDB>(in_key.amount,
+                                           absolute_offsets,
+                                           outputs);
         }
         catch (const std::exception& e)
         {
@@ -6235,8 +6630,11 @@ construct_tx_context(transaction tx, uint16_t with_ring_signatures = 0)
 
         if (core_storage->get_db().tx_exists(txd.hash, tx_index))
         {
-            out_amount_indices = core_storage->get_db()
-                    .get_tx_amount_output_indices(tx_index);
+            //out_amount_indices = core_storage->get_db()
+                    //.get_tx_amount_output_indices(tx_index).front();
+            get_tx_amount_output_indices<BlockchainDB>(
+                   out_amount_indices, 
+                   tx_index);
         }
         else
         {
@@ -6740,9 +7138,45 @@ add_js_files(mstch::map& context)
     }};
 }
 
-};
+template <typename T, typename... Args>
+typename std::enable_if<
+    HasSpanInGetOutputKeyT<T>::value, void>::type
+get_output_key(uint64_t amount, Args&&... args)
+{
+  core_storage->get_db().get_output_key(
+          epee::span<const uint64_t>(&amount, 1), 
+          std::forward<Args>(args)...);
 }
 
+template <typename T, typename... Args>
+typename std::enable_if<
+    !HasSpanInGetOutputKeyT<T>::value, void>::type
+get_output_key(uint64_t amount, Args&&... args)
+{
+  core_storage->get_db().get_output_key(
+          amount, std::forward<Args>(args)...);
+}
+
+template <typename T, typename... Args>
+typename std::enable_if<
+    !OutputIndicesReturnVectOfVectT<T>::value, void>::type
+get_tx_amount_output_indices(vector<uint64_t>& out_amount_indices, Args&&... args)
+{
+    out_amount_indices = core_storage->get_db()
+       .get_tx_amount_output_indices(std::forward<Args>(args)...);
+}
+
+template <typename T, typename... Args>
+typename std::enable_if<
+    OutputIndicesReturnVectOfVectT<T>::value, void>::type
+get_tx_amount_output_indices(vector<uint64_t>& out_amount_indices, Args&&... args)
+{
+    out_amount_indices = core_storage->get_db()
+       .get_tx_amount_output_indices(std::forward<Args>(args)...).front();
+}
+
+};
+}
 
 #endif //CROWXTA_PAGE_H
 

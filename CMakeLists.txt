@@ -140,7 +140,6 @@ set(LIBRARIES
         checkpoints
         version
         epee
-        hardforks
         randomx
         sodium
         ${Boost_LIBRARIES}

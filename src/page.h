@@ -1133,7 +1133,7 @@ show_block(uint64_t _blk_height)
             {"blk_nonce"            , blk.nonce},
             {"blk_pow_hash"         , blk_pow_hash_str},
             {"is_randomx"           , (blk.major_version >= 13)},
-            {"blk_difficulty"       , blk_difficulty.str()},
+            {"blk_difficulty"       , blk_difficulty},
             {"age_format"           , age.second},
             {"major_ver"            , std::to_string(blk.major_version)},
             {"minor_ver"            , std::to_string(blk.minor_version)},

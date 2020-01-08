@@ -1,4 +1,4 @@
-// Copyright (c) 2019, The Monero Project
+// Copyright (c) 2019, The Bittube Project
 //
 // All rights reserved.
 //
@@ -87,7 +87,7 @@ static inline int force_software_aes(void)
   if (use != -1)
     return use;
 
-  const char *env = getenv("MONERO_USE_SOFTWARE_AES");
+  const char *env = getenv("BITTUBE_USE_SOFTWARE_AES");
   if (!env) {
     use = 0;
   }
@@ -139,7 +139,7 @@ static inline int use_rx_jit(void)
   if (use_rx_jit_flag != -1)
     return use_rx_jit_flag;
 
-  const char *env = getenv("MONERO_USE_RX_JIT");
+  const char *env = getenv("BITTUBE_USE_RX_JIT");
   if (!env) {
     use_rx_jit_flag = 1;
   }

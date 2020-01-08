@@ -1,6 +1,6 @@
 # BitTube Blockchain Explorer
 
-Based on [Onion Monero Blockchain Explorer](https://github.com/bittubeexamples/onion-bittube-blockchain-explorer)
+Based on [Onion Bittube Blockchain Explorer](https://github.com/bittubeexamples/onion-bittube-blockchain-explorer)
 
 ## Explorer hosts
 
@@ -72,7 +72,7 @@ mkdir build && cd build
 # create the makefile
 cmake ..
 
-# alternatively you can use: cmake -DMONERO_DIR=/path/to/bittube_folder ..
+# alternatively you can use: cmake -DBITTUBE_DIR=/path/to/bittube_folder ..
 # if BitTube is not in ~/bittube
 #
 # also can build with ASAN (sanitizers), for example

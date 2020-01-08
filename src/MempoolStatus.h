@@ -2,8 +2,8 @@
 // Created by mwo on 28/05/17.
 //
 
-#ifndef XMRBLOCKS_MEMPOOLSTATUS_H
-#define XMRBLOCKS_MEMPOOLSTATUS_H
+#ifndef XTABLOCKS_MEMPOOLSTATUS_H
+#define XTABLOCKS_MEMPOOLSTATUS_H
 
 
 #include "MicroCore.h"
@@ -125,7 +125,7 @@ struct MempoolStatus
     static atomic<uint64_t> mempool_size; // size in bytes.
 
     static bf::path blockchain_path;
-    static string daemon_url;
+    static string deamon_url;
     static cryptonote::network_type nettype;
 
     // make object for accessing the blockchain here
@@ -164,4 +164,4 @@ struct MempoolStatus
 };
 
 }
-#endif //XMRBLOCKS_MEMPOOLSTATUS_H
+#endif //XTABLOCKS_MEMPOOLSTATUS_H

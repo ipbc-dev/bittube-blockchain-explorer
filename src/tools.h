@@ -2,8 +2,8 @@
 // Created by mwo on 5/11/15.
 //
 
-#ifndef XMREG01_TOOLS_H
-#define XMREG01_TOOLS_H
+#ifndef XTAEG01_TOOLS_H
+#define XTAEG01_TOOLS_H
 
 #define PATH_SEPARARTOR '/'
 
@@ -375,4 +375,4 @@ tx_to_hex(transaction const& tx);
 
 }
 
-#endif //XMREG01_TOOLS_H
+#endif //XTAEG01_TOOLS_H

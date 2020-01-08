@@ -30,9 +30,10 @@
 
 set(LIBS common;blocks;cryptonote_basic;cryptonote_core;multisig;
 		cryptonote_protocol;daemonizer;mnemonics;epee;lmdb;device;
-		blockchain_db;ringct;wallet;cncrypto;easylogging;version;checkpoints)
+		blockchain_db;ringct;wallet;cncrypto;easylogging;version;
+        checkpoints;randomx)
 
-set(BitTube_INCLUDE_DIRS "${CPP_BITTUBE_DIR}")
+set(BitTube_INCLUDE_DIRS "${CPP_MONERO_DIR}")
 
 # if the project is a subset of main cpp-ethereum project
 # use same pattern for variables as Boost uses
@@ -44,7 +45,7 @@ foreach (l ${LIBS})
 	find_library(BitTube_${L}_LIBRARY
 		NAMES ${l}
 		PATHS ${CMAKE_LIBRARY_PATH}
-		PATH_SUFFIXES "/src/${l}" "/src/" "/external/db_drivers/lib${l}" "/lib" "/src/crypto" "/contrib/epee/src" "/external/easylogging++/"
+		PATH_SUFFIXES "/src/${l}" "/src/" "/external/db_drivers/lib${l}" "/lib" "/src/crypto" "/contrib/epee/src" "/external/easylogging++/" "/external/${l}"
 		NO_DEFAULT_PATH
 	)
 
@@ -57,21 +58,23 @@ foreach (l ${LIBS})
 
 endforeach()
 
-if (EXISTS ${BITTUBE_BUILD_DIR}/src/ringct/libringct_basic.a)
+if (EXISTS ${MONERO_BUILD_DIR}/src/ringct/libringct_basic.a)
 	message(STATUS FindBitTube " found libringct_basic.a")
 	add_library(ringct_basic STATIC IMPORTED)
 	set_property(TARGET ringct_basic
-			PROPERTY IMPORTED_LOCATION ${BITTUBE_BUILD_DIR}/src/ringct/libringct_basic.a)
+			PROPERTY IMPORTED_LOCATION ${MONERO_BUILD_DIR}/src/ringct/libringct_basic.a)
 endif()
 
 
-message(STATUS ${BITTUBE_SOURCE_DIR}/build)
+message(STATUS ${MONERO_SOURCE_DIR}/build)
 
 # include BitTube headers
 include_directories(
-		${BITTUBE_SOURCE_DIR}/src
-		${BITTUBE_SOURCE_DIR}/external
-		${BITTUBE_SOURCE_DIR}/build
-		${BITTUBE_SOURCE_DIR}/external/easylogging++
-		${BITTUBE_SOURCE_DIR}/contrib/epee/include
-		${BITTUBE_SOURCE_DIR}/external/db_drivers/liblmdb)
+		${MONERO_SOURCE_DIR}/src
+                ${MONERO_SOURCE_DIR}/src/crypto
+		${MONERO_SOURCE_DIR}/external
+		${MONERO_SOURCE_DIR}/external/randomx/src
+		${MONERO_SOURCE_DIR}/build
+		${MONERO_SOURCE_DIR}/external/easylogging++
+		${MONERO_SOURCE_DIR}/contrib/epee/include
+		${MONERO_SOURCE_DIR}/external/db_drivers/liblmdb)

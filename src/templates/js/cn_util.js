@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2017, MyMonero.com
+// Copyright (c) 2014-2017, MyItalo.com
 // 
 // All rights reserved.
 // 

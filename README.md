@@ -1,6 +1,6 @@
 # BitTube Blockchain Explorer
 
-Based on [Onion Monero Blockchain Explorer](https://github.com/moneroexamples/onion-monero-blockchain-explorer)
+Based on [Onion Monero Blockchain Explorer](https://github.com/bittubeexamples/onion-bittube-blockchain-explorer)
 
 ## Explorer hosts
 
@@ -13,7 +13,6 @@ Testnet version:
 The key features of the BitTube Blockchain Explorer are:
 
  - no cookies, no web analytics trackers, no images,
- - by default no JavaScript, but can be enabled for client side decoding and proving transactions,
  - open sourced,
  - made fully in C++,
  - showing encrypted payments ID,
@@ -50,7 +49,7 @@ git clone --recursive https://github.com/ipbc-dev/bittube.git bittube
 
 cd bittube/
 
-https://github.com/moneroexamples/monero-compilation/blob/master/README.md
+https://github.com/bittubeexamples/bittube-compilation/blob/master/README.md
 
 ##### Compile and run the explorer
 
@@ -73,7 +72,7 @@ mkdir build && cd build
 # create the makefile
 cmake ..
 
-# alternatively you can use: cmake -DBITTUBE_DIR=/path/to/bittube_folder ..
+# alternatively you can use: cmake -DMONERO_DIR=/path/to/bittube_folder ..
 # if BitTube is not in ~/bittube
 #
 # also can build with ASAN (sanitizers), for example
@@ -130,8 +129,6 @@ bittube-blockchain-explorer, BitTube Blockchain Explorer:
   --show-cache-times [=arg(=1)] (=0)    show times of getting data from cache
                                         vs no cache
   --enable-block-cache [=arg(=1)] (=0)  enable caching of block details
-  --enable-js [=arg(=1)] (=0)           enable checking outputs and proving txs
-                                        using JavaScript on client side
   --enable-autorefresh-option [=arg(=1)] (=0)
                                         enable users to have the index page on
                                         autorefresh
@@ -160,8 +157,8 @@ bittube-blockchain-explorer, BitTube Blockchain Explorer:
                                         functionality
   --ssl-key-file arg                    path to key file for ssl (https)
                                         functionality
-  -d [ --daemon-url ] arg (=http:://127.0.0.1:24182)
-                                        BitTube daemon url
+  -d [ --deamon-url ] arg (=http:://127.0.0.1:24182)
+                                        BitTube deamon url
 ```
 
 Example usage, defined as bash aliases.
@@ -214,15 +211,6 @@ The values given, can be checked using BitTube daemon's  `print_coinbase_tx_sum`
 For example, for the above example: `print_coinbase_tx_sum 0 1313449`.
 
 To disable the monitor, simply restart the explorer without `--enable-emission-monitor` flag.
-
-## Enable JavaScript for decoding proving transactions
-
-By default, decoding and proving tx's outputs are done on the server side. To do this on the client side
-(private view and tx keys are not send to the server) JavaScript-based decoding can be enabled:
-
-```
-bittube-blockchain-explorer --enable-js
-```
 
 ## Enable SSL (https)
 

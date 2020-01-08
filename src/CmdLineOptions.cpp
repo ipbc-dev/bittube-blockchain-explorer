@@ -37,16 +37,6 @@ namespace xmreg
                  "enable outputs key file checker")
                 ("enable-json-api", value<bool>()->default_value(false)->implicit_value(true),
                  "enable JSON REST api")
-                ("enable-legacy-api", value<bool>()->default_value(false)->implicit_value(true),
-                 "enable Legacy api")
-                ("enable-tx-cache", value<bool>()->default_value(false)->implicit_value(true),
-                 "enable caching of transaction details")
-                ("show-cache-times", value<bool>()->default_value(false)->implicit_value(true),
-                 "show times of getting data from cache vs no cache")
-                ("enable-block-cache", value<bool>()->default_value(false)->implicit_value(true),
-                 "enable caching of block details")
-                ("enable-js", value<bool>()->default_value(false)->implicit_value(true),
-                 "enable checking outputs and proving txs using JavaScript on client side")
                 ("enable-as-hex", value<bool>()->default_value(false)->implicit_value(true),
                  "enable links to provide hex represtations of a tx and a block")
                 ("enable-autorefresh-option", value<bool>()->default_value(false)->implicit_value(true),
@@ -77,8 +67,8 @@ namespace xmreg
                  "path to crt file for ssl (https) functionality")
                 ("ssl-key-file", value<string>(),
                  "path to key file for ssl (https) functionality")
-                ("daemon-url,d", value<string>()->default_value("http:://127.0.0.1:24182"),
-                 "BitTube daemon url");
+                ("deamon-url,d", value<string>()->default_value("http:://127.0.0.1:24182"),
+                 "BitTube deamon url");
 
 
         store(command_line_parser(acc, avv)

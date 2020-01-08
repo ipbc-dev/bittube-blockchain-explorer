@@ -239,7 +239,7 @@ generate_key_image(const crypto::key_derivation& derivation,
 string
 get_default_lmdb_folder(cryptonote::network_type nettype)
 {
-    // default path to BitTube folder
+    // default path to bittube folder
     // on linux this is /home/<username>/.bittube
     string default_bittube_dir = tools::get_default_data_dir();
 

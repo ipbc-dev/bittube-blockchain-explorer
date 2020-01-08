@@ -3,8 +3,8 @@
 //
 
 
-#ifndef CROWXMR_RPCCALLS_H
-#define CROWXMR_RPCCALLS_H
+#ifndef CROWXTA_RPCCALLS_H
+#define CROWXTA_RPCCALLS_H
 
 #include "bittube_headers.h"
 
@@ -47,8 +47,8 @@ struct has_destructor
 
 namespace cryptonote
 {
-// declare struct in BitTube's cryptonote namespace.
-// BitTube should provide definition for this,
+// declare struct in italo's cryptonote namespace.
+// italo should provide definition for this,
 // but we need to have it declared as we are going to
 // check if its definition exist or not. depending on this
 // we decide what gets to be defined as
@@ -67,7 +67,7 @@ using namespace std;
 
 class rpccalls
 {
-    string daemon_url ;
+    string deamon_url ;
     uint64_t timeout_time;
 
     std::chrono::milliseconds timeout_time_ms;
@@ -81,11 +81,11 @@ class rpccalls
 
 public:
 
-    rpccalls(string _daemon_url = "http:://127.0.0.1:24182",
+    rpccalls(string _deamon_url = "http:://127.0.0.1:13102",
              uint64_t _timeout = 200000);
 
     bool
-    connect_to_bittube_daemon();
+    connect_to_italo_deamon();
 
     uint64_t
     get_current_height();
@@ -130,9 +130,9 @@ public:
         {
             std::lock_guard<std::mutex> guard(m_daemon_rpc_mutex);
 
-            if (!connect_to_bittube_daemon())
+            if (!connect_to_italo_deamon())
             {
-                cerr << "get_alt_blocks: not connected to daemon" << endl;
+                cerr << "get_alt_blocks: not connected to deamon" << endl;
                 return false;
             }
 
@@ -156,15 +156,15 @@ public:
 
             if (!err.empty())
             {
-                cerr << "Error connecting to BitTube daemon due to "
+                cerr << "Error connecting to Italo deamon due to "
                      << err << endl;
                 return false;
             }
         }
         else
         {
-            cerr << "Error connecting to BitTube daemon at "
-                 << daemon_url << endl;
+            cerr << "Error connecting to Italo deamon at "
+                 << deamon_url << endl;
             return false;
         }
 
@@ -193,4 +193,4 @@ public:
 
 
 
-#endif //CROWXMR_RPCCALLS_H
+#endif //CROWXTA_RPCCALLS_H

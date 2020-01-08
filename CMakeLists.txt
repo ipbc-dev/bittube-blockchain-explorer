@@ -13,21 +13,33 @@ if (WIN32)
 endif()
 
 
-if (NOT BITTUBE_DIR)
-    set(BITTUBE_DIR ~/bittube)
+if (NOT MONERO_DIR)
+    set(MONERO_DIR ~/bittube)
 endif()
 
-message(STATUS BITTUBE_DIR ": ${BITTUBE_DIR}")
+message(STATUS MONERO_DIR ": ${MONERO_DIR}")
 
-if (NOT BITTUBE_SOURCE_DIR)
-    set(BITTUBE_SOURCE_DIR ${BITTUBE_DIR}
+if (NOT MONERO_SOURCE_DIR)
+    set(MONERO_SOURCE_DIR ${MONERO_DIR}
             CACHE PATH "Path to the root directory for BitTube")
 endif()
 
-if (NOT BITTUBE_BUILD_DIR)
-    # set location of BitTube build tree
-    set(BITTUBE_BUILD_DIR ${BITTUBE_SOURCE_DIR}/build/release/
-            CACHE PATH "Path to the build directory for BitTube")
+if (NOT MONERO_BUILD_DIR)
+    # set location of bittube build tree
+    set(MONERO_BUILD_DIR ${MONERO_SOURCE_DIR}/build/release/
+          CACHE PATH "Path to the build directory for Monero")
+
+   if (NOT EXISTS ${MONERO_BUILD_DIR})   
+        # try different location   
+        message(STATUS "Trying different folder for bittube libraries")
+        set(MONERO_BUILD_DIR ${MONERO_SOURCE_DIR}/build/Linux/master/release/
+            CACHE PATH "Path to the build directory for Monero" FORCE)
+    endif()
+
+endif()
+
+if (NOT EXISTS ${MONERO_BUILD_DIR})   
+  message(FATAL_ERROR "Monero libraries not found in: ${MONERO_BUILD_DIR}")
 endif()
 
 set(MY_CMAKE_DIR "${CMAKE_CURRENT_LIST_DIR}/cmake"
@@ -35,7 +47,7 @@ set(MY_CMAKE_DIR "${CMAKE_CURRENT_LIST_DIR}/cmake"
 
 list(APPEND CMAKE_MODULE_PATH "${MY_CMAKE_DIR}")
 
-set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${BITTUBE_BUILD_DIR}"
+set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${MONERO_BUILD_DIR}"
         CACHE PATH "Add BitTube directory for library searching")
 
 include(MyUtils)
@@ -66,7 +78,7 @@ endif()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin" OR WIN32)
     add_library(unbound STATIC IMPORTED)
-    set_property(TARGET unbound PROPERTY IMPORTED_LOCATION ${BITTUBE_BUILD_DIR}/external/unbound/libunbound.a)
+    set_property(TARGET unbound PROPERTY IMPORTED_LOCATION ${MONERO_BUILD_DIR}/external/unbound/libunbound.a)
 endif()
 
 
@@ -75,7 +87,7 @@ endif()
 include_directories(${Boost_INCLUDE_DIRS})
 
 # include bittube
-include_directories(${BITTUBE_SOURCE_DIR}/build)
+include_directories(${MONERO_SOURCE_DIR}/build)
 
 include_directories("ext/mstch/include")
 include_directories("ext/mstch/include/src")
@@ -128,6 +140,7 @@ set(LIBRARIES
         checkpoints
         version
         epee
+        randomx
         sodium
         ${Boost_LIBRARIES}
         pthread

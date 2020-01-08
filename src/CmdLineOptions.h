@@ -2,8 +2,8 @@
 // Created by mwo on 6/11/15.
 //
 
-#ifndef XMREG01_CMDLINEOPTIONS_H
-#define XMREG01_CMDLINEOPTIONS_H
+#ifndef XTAEG01_CMDLINEOPTIONS_H
+#define XTAEG01_CMDLINEOPTIONS_H
 
 #include <iostream>
 #include <string>
@@ -34,4 +34,4 @@ namespace xmreg
 }
 
 
-#endif //XMREG01_CMDLINEOPTIONS_H
+#endif //XTAEG01_CMDLINEOPTIONS_H

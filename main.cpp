@@ -2,7 +2,6 @@
 
 
 #include "src/page.h"
-#include "src/rpccalls.h"
 
 #include "ext/crow/crow.h"
 #include "src/CmdLineOptions.h"
@@ -42,6 +41,7 @@ struct jsonresponse: public crow::response
 int
 main(int ac, const char* av[])
 {
+
     // get command line options
     xmreg::CmdLineOptions opts {ac, av};
 
@@ -56,7 +56,7 @@ main(int ac, const char* av[])
     auto port_opt                      = opts.get_option<string>("port");
     auto bindaddr_opt                  = opts.get_option<string>("bindaddr");
     auto bc_path_opt                   = opts.get_option<string>("bc-path");
-    auto daemon_url_opt                = opts.get_option<string>("daemon-url");
+    auto deamon_url_opt                = opts.get_option<string>("deamon-url");
     auto ssl_crt_file_opt              = opts.get_option<string>("ssl-crt-file");
     auto ssl_key_file_opt              = opts.get_option<string>("ssl-key-file");
     auto no_blocks_on_index_opt        = opts.get_option<string>("no-blocks-on-index");
@@ -71,15 +71,10 @@ main(int ac, const char* av[])
     auto enable_output_key_checker_opt = opts.get_option<bool>("enable-output-key-checker");
     auto enable_autorefresh_option_opt = opts.get_option<bool>("enable-autorefresh-option");
     auto enable_pusher_opt             = opts.get_option<bool>("enable-pusher");
-    auto enable_js_opt                 = opts.get_option<bool>("enable-js");
     auto enable_mixin_details_opt      = opts.get_option<bool>("enable-mixin-details");
     auto enable_json_api_opt           = opts.get_option<bool>("enable-json-api");
-    auto enable_legacy_api_opt         = opts.get_option<bool>("enable-legacy-api");
     auto enable_as_hex_opt             = opts.get_option<bool>("enable-as-hex");
-    auto enable_tx_cache_opt           = opts.get_option<bool>("enable-tx-cache");
     auto concurrency_opt               = opts.get_option<size_t>("concurrency");
-    auto enable_block_cache_opt        = opts.get_option<bool>("enable-block-cache");
-    auto show_cache_times_opt          = opts.get_option<bool>("show-cache-times");
     auto enable_emission_monitor_opt   = opts.get_option<bool>("enable-emission-monitor");
 
 
@@ -98,21 +93,16 @@ main(int ac, const char* av[])
         cryptonote::network_type::STAGENET : cryptonote::network_type::MAINNET;
 
     bool enable_pusher                {*enable_pusher_opt};
-    bool enable_js                    {*enable_js_opt};
     bool enable_key_image_checker     {*enable_key_image_checker_opt};
     bool enable_autorefresh_option    {*enable_autorefresh_option_opt};
     bool enable_output_key_checker    {*enable_output_key_checker_opt};
     bool enable_mixin_details         {*enable_mixin_details_opt};
     bool enable_json_api              {*enable_json_api_opt};
-    bool enable_legacy_api            {*enable_legacy_api_opt};
     bool enable_as_hex                {*enable_as_hex_opt};
-    bool enable_tx_cache              {*enable_tx_cache_opt};
-    bool enable_block_cache           {*enable_block_cache_opt};
     bool enable_emission_monitor      {*enable_emission_monitor_opt};
-    bool show_cache_times             {*show_cache_times_opt};
 
 
-    // set BitTube log output level
+    // set  monero log output level
     uint32_t log_level = 0;
     mlog_configure("", true);
 
@@ -184,12 +174,12 @@ main(int ac, const char* av[])
         return EXIT_FAILURE;
     }
 
-    string daemon_url {*daemon_url_opt};
+    string deamon_url {*deamon_url_opt};
 
-    if (testnet && daemon_url == "http:://127.0.0.1:24182")
-        daemon_url = "http:://127.0.0.1:34182";
-    if (stagenet && daemon_url == "http:://127.0.0.1:24182")
-        daemon_url = "http:://127.0.0.1:44182";
+    if (testnet && deamon_url == "http:://127.0.0.1:24182")
+        deamon_url = "http:://127.0.0.1:34182";
+    if (stagenet && deamon_url == "http:://127.0.0.1:24182")
+        deamon_url = "http:://127.0.0.1:44182";
 
     uint64_t mempool_info_timeout {5000};
 
@@ -211,12 +201,12 @@ main(int ac, const char* av[])
     {
         // This starts new thread, which aim is
         // to calculate, store and monitor
-        // current total BitTube emission amount.
+        // current total Monero emission amount.
 
         // This thread stores the current emission
         // which it has caluclated in
         // <blockchain_path>/emission_amount.txt file,
-        // e.g., ~/.bittube/lmdb/emission_amount.txt.
+        // e.g., ~/.bitmonero/lmdb/emission_amount.txt.
         // So instead of calcualting the emission
         // from scrach whenever the explorer is started,
         // the thread is initalized with the values
@@ -226,8 +216,8 @@ main(int ac, const char* av[])
                 = blockchain_path;
         xmreg::CurrentBlockchainStatus::nettype
                 = nettype;
-        xmreg::CurrentBlockchainStatus::daemon_url
-                = daemon_url;
+        xmreg::CurrentBlockchainStatus::deamon_url
+                = deamon_url;
         xmreg::CurrentBlockchainStatus::set_blockchain_variables(
                 &mcore, core_storage);
 
@@ -243,8 +233,8 @@ main(int ac, const char* av[])
             = blockchain_path;
     xmreg::MempoolStatus::nettype
             = nettype;
-    xmreg::MempoolStatus::daemon_url
-            = daemon_url;
+    xmreg::MempoolStatus::deamon_url
+            = deamon_url;
     xmreg::MempoolStatus::set_blockchain_variables(
             &mcore, core_storage);
 
@@ -276,18 +266,14 @@ main(int ac, const char* av[])
     // contains logic for the website
     xmreg::page xmrblocks(&mcore,
                           core_storage,
-                          daemon_url,
+                          deamon_url,
                           nettype,
                           enable_pusher,
-                          enable_js,
                           enable_as_hex,
                           enable_key_image_checker,
                           enable_output_key_checker,
                           enable_autorefresh_option,
                           enable_mixin_details,
-                          enable_tx_cache,
-                          enable_block_cache,
-                          show_cache_times,
                           no_blocks_on_index,
                           mempool_info_timeout,
                           *testnet_url,
@@ -317,6 +303,11 @@ main(int ac, const char* av[])
     ([&](size_t block_height) {
         return myxmr::htmlresponse(xmrblocks.show_block(block_height));
     });
+    
+    CROW_ROUTE(app, "/randomx/<uint>")
+    ([&](size_t block_height) {
+        return myxmr::htmlresponse(xmrblocks.show_randomx(block_height));
+    });
 
     CROW_ROUTE(app, "/block/<string>")
     ([&](string block_hash) {
@@ -329,6 +320,16 @@ main(int ac, const char* av[])
         return myxmr::htmlresponse(
                 xmrblocks.show_tx(remove_bad_chars(tx_hash)));
     });
+    if (enable_autorefresh_option)
+    {
+        CROW_ROUTE(app, "/tx/<string>/autorefresh")
+        ([&](string tx_hash) {
+            bool refresh_page {true};
+            uint16_t with_ring_signatures {0};
+            return myxmr::htmlresponse(
+                xmrblocks.show_tx(remove_bad_chars(tx_hash), with_ring_signatures, refresh_page));
+        });
+    }
 
     if (enable_as_hex)
     {
@@ -378,6 +379,15 @@ main(int ac, const char* av[])
                 xmrblocks.show_tx(remove_bad_chars(tx_hash), 
                     with_ring_signatures));
     });
+    if (enable_autorefresh_option)
+    {
+        CROW_ROUTE(app, "/tx/<string>/<uint>/autorefresh")
+        ([&](string tx_hash, uint16_t with_ring_signature) {
+            bool refresh_page {true};
+            return myxmr::htmlresponse(
+                xmrblocks.show_tx(remove_bad_chars(tx_hash), with_ring_signature, refresh_page));
+        });
+    }
 
     CROW_ROUTE(app, "/myoutputs").methods("POST"_method)
     ([&](const crow::request& req) -> myxmr::htmlresponse
@@ -606,64 +616,6 @@ main(int ac, const char* av[])
         return text;
     });
 
-    if (enable_js)
-    {
-        cout << "Enable JavaScript checking of outputs and proving txs\n";
-
-        CROW_ROUTE(app, "/js/jquery.min.js")
-        ([&]() {
-            return xmrblocks.get_js_file("jquery.min.js");
-        });
-
-        CROW_ROUTE(app, "/js/crc32.js")
-        ([&]() {
-            return xmrblocks.get_js_file("crc32.js");
-        });
-
-        CROW_ROUTE(app, "/js/biginteger.js")
-        ([&]() {
-            return xmrblocks.get_js_file("biginteger.js");
-        });
-
-        CROW_ROUTE(app, "/js/crypto.js")
-        ([&]() {
-            return xmrblocks.get_js_file("crypto.js");
-        });
-
-        CROW_ROUTE(app, "/js/config.js")
-        ([&]() {
-            return xmrblocks.get_js_file("config.js");
-        });
-
-        CROW_ROUTE(app, "/js/nacl-fast-cn.js")
-        ([&]() {
-            return xmrblocks.get_js_file("nacl-fast-cn.js");
-        });
-
-        CROW_ROUTE(app, "/js/base58.js")
-        ([&]() {
-            return xmrblocks.get_js_file("base58.js");
-        });
-
-        CROW_ROUTE(app, "/js/cn_util.js")
-        ([&]() {
-            return xmrblocks.get_js_file("cn_util.js");
-        });
-
-        CROW_ROUTE(app, "/js/sha3.js")
-        ([&]() {
-            return xmrblocks.get_js_file("sha3.js");
-        });
-
-        CROW_ROUTE(app, "/js/all_in_one.js")
-        ([&]() {
-            // /js/all_in_one.js file does not exist. it is generated on the fly
-            // from the above real files.
-            return xmrblocks.get_js_file("all_in_one.js");
-        });
-
-    } // if (enable_js)
-
     if (enable_json_api)
     {
 
@@ -856,54 +808,6 @@ main(int ac, const char* av[])
             return xmrblocks.index2(page_no, refresh_page);
         });
     }
-
-    if (enable_legacy_api) {
-        CROW_ROUTE(app, "/q/hashrate")
-        ([&]() {
-            xmreg::rpccalls rpc {daemon_url};
-            xmreg::COMMAND_RPC_GET_INFO::response rpc_network_info;
-            if (!rpc.get_network_info(rpc_network_info)) throw std::runtime_error("Unable to get network info");
-            return std::to_string(rpc_network_info.difficulty / 120);
-        });
-        CROW_ROUTE(app, "/q/height")
-        ([&]() {
-            return std::to_string(core_storage->get_current_blockchain_height() - 1);
-        });
-        CROW_ROUTE(app, "/q/reward")
-        ([&]() {
-            uint64_t reward = 0, height = core_storage->get_current_blockchain_height() - 1;
-            cryptonote::block blk;
-            if (!mcore.get_block_by_height(height, blk)) throw std::runtime_error("Unable to fetch top block");
-            for (auto out : blk.miner_tx.vout) reward += out.amount;
-            return xmreg::xmr_amount_to_str(reward, "{:0.8f}");
-        });
-        CROW_ROUTE(app, "/q/supply")
-        ([&]() {
-            xmreg::CurrentBlockchainStatus::Emission emission = xmreg::CurrentBlockchainStatus::get_emission();
-            return xmreg::xmr_amount_to_str(emission.coinbase + emission.fee, "{:0.8f}");
-        });
-    }
-
-    CROW_ROUTE(app, "/airtime").methods("GET"_method)
-    ([&]() {
-        return xmrblocks.airtime();
-    });
-    CROW_ROUTE(app, "/airtime.html").methods("GET"_method)
-    ([&]() {
-        return xmrblocks.airtime();
-    });
-    CROW_ROUTE(app, "/css/style.css").methods("GET"_method)
-    ([&]() {
-        return xmrblocks.css_style();
-    });
-    CROW_ROUTE(app, "/css/roboto_font.css").methods("GET"_method)
-    ([&]() {
-        return xmrblocks.css_roboto_font();
-    });
-    CROW_ROUTE(app, "/js/airtime.js").methods("GET"_method)
-    ([&]() {
-        return xmrblocks.js_airtime();
-    });
 
     // run the crow http server
 

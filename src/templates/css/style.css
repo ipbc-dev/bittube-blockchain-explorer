@@ -85,7 +85,7 @@ body {
   color: #3c4858;
   /*background-color: black;*/
   background-color: #eee;
-  font-family: Roboto, Helvetica, Arial, sans-serif;
+  font-family: 'Open Sans', 'Roboto', Tahoma, arial, sans-serif;
 }
 
 h1,
@@ -129,7 +129,7 @@ td {
 }
 
 td>a {
-  color: #86af49 !important;
+  color: #00abff !important;
 }
 
 td>a:hover {
@@ -138,7 +138,7 @@ td>a:hover {
 
 a,
 .clickAbleSpan {
-  color: #86af49 !important;
+  color: #00abff !important;
 }
 
 .clickAbleSpan {
@@ -157,7 +157,7 @@ a,
 
 a:link {
   text-decoration: none;
-  color: #86af49;
+  color: #00abff;
 }
 
 a:visited {
@@ -167,7 +167,7 @@ a:visited {
 
 a:hover {
   text-decoration: none;
-  color: #86af49;
+  color: #00abff;
 }
 
 a:active {
@@ -293,13 +293,15 @@ input#toggle-1[type=checkbox]:checked~div#decoded-inputs {
 }
 
 .playSvg {
-  height: 25px;
-  margin-top: 2px;
+  height: 33px;
+  margin-top: 0px;
+  /* height: 25px;
+  margin-top: 2px; */
   float: left;
 }
 
 .greenSvg {
-  fill: #86af49;
+  fill: #00abff;
 }
 
 .logo {
@@ -610,7 +612,7 @@ input[type="time"] {
   background: white;
   border: 1px solid #ccc !important;
   width: 100px;
-  font-family: Roboto, Helvetica, Arial, sans-serif;
+  font-family: 'Open Sans', 'Roboto', Tahoma, arial, sans-serif;
   padding-left: 8px;
 }
 
@@ -628,7 +630,7 @@ label.DatePicker {
 }
 
 input.DatePicker {
-  font-family: Roboto, Helvetica, Arial, sans-serif;
+  font-family: 'Open Sans', 'Roboto', Tahoma, arial, sans-serif;
   border-radius: 5px;
   background-color: #fff;
   padding: 3px 5px;

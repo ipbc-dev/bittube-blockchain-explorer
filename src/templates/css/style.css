@@ -194,7 +194,8 @@ form {
 
 .tabs {
   position: relative;
-  min-height: 220px;
+  min-height: 255px;
+  /*min-height: 220px;*/
   /* This part sucks */
   clear: both;
   margin: 25px 0;
@@ -435,11 +436,12 @@ input {
 
 table {
   border-spacing: 0;
-  border: 1px solid #dcdcdc;
+  border: 1px solid #ddd;
+  background: white;
 }
 
 td {
-  border-top: 1px solid #dcdcdc !important;
+  border-top: 1px solid #ddd !important;
 }
 
 tr:first-of-type {

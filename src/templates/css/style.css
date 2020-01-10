@@ -223,7 +223,7 @@ form {
   position: absolute;
   top: 28px;
   left: 0;
-  background: #eeeeee;
+  background: #ffffff;
   right: 0;
   bottom: 0;
   padding: 20px;
@@ -232,7 +232,7 @@ form {
 }
 
 [type=radio]:checked~label {
-  background: #e6e6e6;
+  background: #f2f0f0;
   border-bottom: none;
   z-index: 2;
 }

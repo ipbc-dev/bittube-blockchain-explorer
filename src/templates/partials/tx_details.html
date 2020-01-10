@@ -7,11 +7,16 @@
     {{/enable_mixins_details}}
     <H5 style="margin:5px">Tx public key: <span id="tx_pub_key">{{tx_pub_key}}</span></H5>
     <span id="add_tx_pub_keys" style="display: none;">{{add_tx_pub_keys}}</span>
-
+    {{#has_payment_ids}}
+    <H5 style="margin:5px">Torrent Hash: <span id="payment_ids">{{payment_ids}}</span></H5>
+    {{/has_payment_ids}}
     {{#has_payment_id}}
-        <H5 style="margin:5px">Payment id: <span id="payment_id">{{payment_id}}</span></H5>
-        <H5 style="margin:5px">Payment id as ascii: {{payment_id_as_ascii}}</H5>
+    {{#doesnt_payment_ids}}
+    <H5 style="margin:5px">Payment id: <span id="payment_id">{{payment_id}}</span></H5>
+    <H5 style="margin:5px">Payment id as ascii: {{payment_id_as_ascii}}</H5>
+    {{/doesnt_payment_ids}}
     {{/has_payment_id}}
+    
 
     {{#has_payment_id8}}
         <H5 style="margin:5px">Payment id (encrypted): <span id="payment_id">{{payment_id8}}</span></H5>

@@ -398,7 +398,7 @@ struct tx_details
                 {"has_payment_id"    , payment_id  != null_hash},
                 {"has_payment_id8"   , payment_id8 != null_hash8},
                 {"pID"               , string {pID}},
-                {"payment_id"        , pod_to_hex(payment_id)},
+                {"payment_id"        , (boost::starts_with(pod_to_hex(payment_id), "000000000000000000000000")) ? pod_to_hex(payment_id) = pod_to_hex(payment_id).substr(24) : pod_to_hex(payment_id)},
                 {"confirmations"     , no_confirmations},
                 {"extra"             , get_extra_str()},
                 {"payment_id8"       , pod_to_hex(payment_id8)},
@@ -1774,7 +1774,7 @@ show_ringmemberstx_jsonhex(string const& tx_hash_str)
 
     tx_details txd = get_tx_details(tx);
 
-    tx_json["payment_id"] = pod_to_hex(txd.payment_id);
+    tx_json["payment_id"] = (boost::starts_with(pod_to_hex(txd.payment_id), "000000000000000000000000")) ? pod_to_hex(txd.payment_id) = pod_to_hex(txd.payment_id).substr(24) : pod_to_hex(txd.payment_id);
     tx_json["payment_id8"] = pod_to_hex(txd.payment_id8);
     tx_json["payment_id8e"] = pod_to_hex(txd.payment_id8);
 
@@ -2095,7 +2095,7 @@ show_my_outputs(string tx_hash_str,
     }
 
     // payments id. both normal and encrypted (payment_id8)
-    string pid_str   = pod_to_hex(txd.payment_id);
+    string pid_str   = (boost::starts_with(pod_to_hex(txd.payment_id), "000000000000000000000000")) ? pod_to_hex(txd.payment_id) = pod_to_hex(txd.payment_id).substr(24) : pod_to_hex(txd.payment_id);
     string pid8_str  = pod_to_hex(txd.payment_id8);
 
     string shortcut_url = tx_prove 
@@ -2129,7 +2129,7 @@ show_my_outputs(string tx_hash_str,
             {"outputs_no"           , static_cast<uint64_t>(txd.output_pub_keys.size())},
             {"has_payment_id"       , txd.payment_id  != null_hash},
             {"has_payment_id8"      , txd.payment_id8 != null_hash8},
-            {"payment_id"           , pid_str},
+            {"payment_id"           , (boost::starts_with(pid_str, "000000000000000000000000")) ? pid_str = pid_str.substr(24) : pid_str},
             {"payment_id8"          , pid8_str},
             {"decrypted_payment_id8", string{}},
             {"tx_prove"             , tx_prove},
@@ -2839,7 +2839,7 @@ show_checkrawtx(string raw_tx_data, string action)
                         {"change_amount"      , xmreg::xmr_amount_to_str(tx_change.amount)},
                         {"has_payment_id"     , (payment_id  != null_hash)},
                         {"has_payment_id8"    , (payment_id8 != null_hash8)},
-                        {"payment_id"         , pid_str},
+                        {"payment_id"         , (boost::starts_with(pid_str, "000000000000000000000000")) ? pid_str = pid_str.substr(24) : pid_str},
                         {"payment_id8"        , pid8_str},
                 };
                 tx_cd_data.emplace("dest_sources" , mstch::array{});
@@ -5768,7 +5768,7 @@ get_payment_id_as_string(
         payment_id = pod_to_hex(txd.payment_id);
     }
 
-    return payment_id;
+    return (boost::starts_with(payment_id, "000000000000000000000000")) ? payment_id = payment_id.substr(24) : payment_id;
 }
 
 template <typename Iterator>
@@ -5891,7 +5891,7 @@ find_our_outputs(
                         {"in_mempool"    , is_mempool},
                         {"output_idx"    , output_idx},
                         {"tx_hash"       , pod_to_hex(txd.hash)},
-                        {"payment_id"    , payment_id_str}
+                        {"payment_id"    , (boost::starts_with(payment_id_str, "000000000000000000000000")) ? payment_id_str = payment_id_str.substr(24) : payment_id_str}
                 });
             }
 
@@ -5920,7 +5920,7 @@ get_tx_json(const transaction& tx, const tx_details& txd)
             {"coinbase"    , is_coinbase(tx)},
             {"mixin"       , txd.mixin_no},
             {"extra"       , txd.get_extra_str()},
-            {"payment_id"  , (txd.payment_id  != null_hash  ? pod_to_hex(txd.payment_id)  : "")},
+            {"payment_id"  , (txd.payment_id  != null_hash  ? (boost::starts_with(pod_to_hex(txd.payment_id), "000000000000000000000000")) ? pod_to_hex(txd.payment_id) = pod_to_hex(txd.payment_id).substr(24) : pod_to_hex(txd.payment_id)  : "")},
             {"payment_id8" , (txd.payment_id8 != null_hash8 ? pod_to_hex(txd.payment_id8) : "")},
     };
 
@@ -6050,7 +6050,9 @@ construct_tx_context(transaction tx, uint16_t with_ring_signatures = 0)
     }
 
     // payments id. both normal and encrypted (payment_id8)
-    string pid_str   = pod_to_hex(txd.payment_id);
+    string pid_str   = (txd.payment_id  != null_hash  ? (boost::starts_with(pod_to_hex(txd.payment_id), "000000000000000000000000")) ? pod_to_hex(txd.payment_id) = pod_to_hex(txd.payment_id).substr(24) : pod_to_hex(txd.payment_id)  : "");
+    string pid_str_hash   = (txd.payment_id  != null_hash  ? (boost::starts_with(pod_to_hex(txd.payment_id), "000000000000000000000000")) ? pod_to_hex(txd.payment_id) = pod_to_hex(txd.payment_id).substr(24) : ""  : "");
+    
     string pid8_str  = pod_to_hex(txd.payment_id8);
 
 
@@ -6087,6 +6089,9 @@ construct_tx_context(transaction tx, uint16_t with_ring_signatures = 0)
             {"has_payment_id8"       , txd.payment_id8 != null_hash8},
             {"confirmations"         , txd.no_confirmations},
             {"payment_id"            , pid_str},
+            {"has_payment_ids"       , pid_str_hash  != ""},
+            {"doesnt_payment_ids"    , pid_str_hash  == ""},
+            {"payment_ids"           , pid_str_hash},
             {"payment_id_as_ascii"   , remove_bad_chars(txd.payment_id_as_ascii)},
             {"payment_id8"           , pid8_str},
             {"extra"                 , txd.get_extra_str()},

@@ -8,6 +8,8 @@
 
 #include "bittube_headers.h"
 
+#include "wipeable_string.h"
+
 #include <mutex>
 #include <utility>
 
@@ -81,11 +83,14 @@ class rpccalls
 
 public:
 
-    rpccalls(string _deamon_url = "http:://127.0.0.1:13102",
+    using login_opt = boost::optional<epee::net_utils::http::login>;
+
+    rpccalls(string _deamon_url = "http:://127.0.0.1:24182",
+             login_opt _login = login_opt {},
              uint64_t _timeout = 200000);
 
     bool
-    connect_to_italo_deamon();
+    connect_to_monero_deamon();
 
     uint64_t
     get_current_height();
@@ -130,7 +135,7 @@ public:
         {
             std::lock_guard<std::mutex> guard(m_daemon_rpc_mutex);
 
-            if (!connect_to_italo_deamon())
+            if (!connect_to_monero_deamon())
             {
                 cerr << "get_alt_blocks: not connected to deamon" << endl;
                 return false;

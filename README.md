@@ -29,6 +29,7 @@ The key features of the BitTube Blockchain Explorer are:
  - can provide total amount of all miner fees,
  - decoding encrypted payment id,
  - decoding outputs and proving txs sent to sub-address.
+ - listing RandomX code for each block
 
 ## Compilation on Ubuntu 16.04/18.04
 
@@ -115,6 +116,7 @@ bittube-blockchain-explorer, BitTube Blockchain Explorer:
   -t [ --testnet ] [=arg(=1)] (=0)      use testnet blockchain
   -s [ --stagenet ] [=arg(=1)] (=0)     use stagenet blockchain
   --enable-pusher [=arg(=1)] (=0)       enable signed transaction pusher
+  --enable-randomx [=arg(=1)] (=0)      enable generation of randomx code
   --enable-mixin-details [=arg(=1)] (=0)
                                         enable mixin details for key images,
                                         e.g., timescale, mixin of mixins, in tx
@@ -123,12 +125,9 @@ bittube-blockchain-explorer, BitTube Blockchain Explorer:
                                         enable key images file checker
   --enable-output-key-checker [=arg(=1)] (=0)
                                         enable outputs key file checker
-  --enable-json-api [=arg(=1)] (=1)     enable JSON REST api
-  --enable-legacy-api [=arg(=1)] (=1)   enable Legacy api
-  --enable-tx-cache [=arg(=1)] (=0)     enable caching of transaction details
-  --show-cache-times [=arg(=1)] (=0)    show times of getting data from cache
-                                        vs no cache
-  --enable-block-cache [=arg(=1)] (=0)  enable caching of block details
+  --enable-json-api [=arg(=1)] (=0)     enable JSON REST api
+  --enable-as-hex [=arg(=1)] (=0)       enable links to provide hex
+                                        represtations of a tx and a block
   --enable-autorefresh-option [=arg(=1)] (=0)
                                         enable users to have the index page on
                                         autorefresh
@@ -136,6 +135,7 @@ bittube-blockchain-explorer, BitTube Blockchain Explorer:
                                         enable BitTube total emission monitoring
                                         thread
   -p [ --port ] arg (=8081)             default explorer port
+  -x [ --bindaddr ] arg (=0.0.0.0)      default bind address for the explorer
   --testnet-url arg                     you can specify testnet url, if you run
                                         it on mainnet or stagenet. link will
                                         show on front page to testnet explorer
@@ -151,6 +151,9 @@ bittube-blockchain-explorer, BitTube Blockchain Explorer:
                                         for mempool data for the front page
   --mempool-refresh-time arg (=5)       time, in seconds, for each refresh of
                                         mempool state
+  -c [ --concurrency ] arg (=0)         number of threads handling http
+                                        queries. Default is 0 which means it is
+                                        based you on the cpu
   -b [ --bc-path ] arg                  path to lmdb folder of the blockchain,
                                         e.g., ~/.bittube/lmdb
   --ssl-crt-file arg                    path to crt file for ssl (https)
@@ -158,7 +161,9 @@ bittube-blockchain-explorer, BitTube Blockchain Explorer:
   --ssl-key-file arg                    path to key file for ssl (https)
                                         functionality
   -d [ --deamon-url ] arg (=http:://127.0.0.1:24182)
-                                        BitTube deamon url
+                                        Monero daemon url
+  --daemon-login arg                    Specify username[:password] for daemon 
+                                        RPC client
 ```
 
 Example usage, defined as bash aliases.
@@ -170,8 +175,6 @@ alias bittube-blockchain-explorer-mainnet='~/bittube-blockchain-explorer/build/b
 # for testnet explorer
 alias bittube-blockchain-explorer-testnet='~/bittube-blockchain-explorer/build/bittube-blockchain-explorer -t --port 8082 --mainnet-url "http://139.162.32.245:8081" --enable-pusher --enable-emission-monitor'
 ```
-
-These are aliases similar to those used for http://139.162.32.245:8081/ and http://139.162.32.245:8082/, respectively.
 
 ## Enable BitTube emission
 
